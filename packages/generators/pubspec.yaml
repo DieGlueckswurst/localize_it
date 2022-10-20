@@ -1,0 +1,18 @@
+name: generators
+description: Getters and setters to save variables to and from Map
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+
+dependencies:
+  build:
+  source_gen:
+  annotations:
+    path: ../annotations/
+
+dev_dependencies:
+  build_test:
+  build_runner:
+  test: ^1.0.0
