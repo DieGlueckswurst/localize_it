@@ -12,11 +12,11 @@ class TranslationGenerator extends GeneratorForAnnotation<LocalizedAnnotation> {
   String test = 'Hallo';
   // 1
   @override
-  String generateForAnnotatedElement(
+  Future<String> generateForAnnotatedElement(
     Element element,
     ConstantReader annotation,
     BuildStep buildStep,
-  ) {
+  ) async {
     // 2
     final visitor = ModelVisitor();
     element.visitChildren(
@@ -28,12 +28,28 @@ class TranslationGenerator extends GeneratorForAnnotation<LocalizedAnnotation> {
     classBuffer.writeln('/*');
     // classBuffer.writeln('base language: ' + visitor.baseLanguage);
 
-    // stdout.writeln('✅' * 10);
+    stdout.writeln(visitor.dynamicLocation);
+    // stdout.writeln(visitor.location);
 
-    const List<String> codes = ['de', 'us', 'es'];
+    const codes = ['de', 'us', 'es'];
+
+    const directoryName = '/localizations';
+
+    final rawLocation = visitor.location;
+    final pathForDirectory = rawLocation.substring(
+      rawLocation.indexOf(
+        'lib',
+      ),
+      rawLocation.length - rawLocation.lastIndexOf('/'),
+    );
+
+    final directory =
+        await Directory(pathForDirectory + directoryName).create();
+
+    stdout.writeln(directory.path);
 
     for (final code in codes) {
-      File('lib/translations/$code.dart').create(recursive: true);
+      File('${directory.path}/$code.dart').create(recursive: true);
     }
 
     // classBuffer.writeln(visitor.fields.entries);
