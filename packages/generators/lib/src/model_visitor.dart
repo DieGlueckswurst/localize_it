@@ -3,17 +3,17 @@ import 'package:analyzer/dart/element/visitor.dart';
 import 'package:analyzer/dart/element/element.dart';
 
 class ModelVisitor extends SimpleElementVisitor<dynamic> {
-  String className;
+  late String className;
 
   // Map<dynamic, dynamic> fields = <dynamic, dynamic>{};
 
   List<String> supportedLanguageCodes = [];
-  String baseLanguageCode;
+  late String baseLanguageCode;
 
-  String location;
+  late String location;
   dynamic dynamicLocation;
 
-  String mapName;
+  late String mapName;
 
   @override
   dynamic visitConstructorElement(ConstructorElement element) {
@@ -32,17 +32,17 @@ class ModelVisitor extends SimpleElementVisitor<dynamic> {
 
   @override
   dynamic visitFieldElement(FieldElement element) {
-    location = element.source.fullName;
+    location = element.source!.fullName;
 
     final valueRaw = element.computeConstantValue();
 
-    if (valueRaw.toStringValue() != null) {
-      baseLanguageCode = valueRaw.toStringValue();
-    } else if (valueRaw.toListValue() != null) {
-      final list = valueRaw.toListValue();
+    if (valueRaw?.toStringValue() != null) {
+      baseLanguageCode = valueRaw!.toStringValue()!;
+    } else if (valueRaw?.toListValue() != null) {
+      final list = valueRaw?.toListValue();
 
-      for (final object in list) {
-        supportedLanguageCodes.add(object.toStringValue());
+      for (final object in list!) {
+        supportedLanguageCodes.add(object.toStringValue()!);
       }
     }
   }

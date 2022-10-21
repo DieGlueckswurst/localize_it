@@ -170,6 +170,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "http",
+      "rootUri": "file:///Users/chris/.pub-cache/hosted/pub.dartlang.org/http-0.13.5",
+      "packageUri": "lib/",
+      "languageVersion": "2.14"
+    },
+    {
       "name": "http_multi_server",
       "rootUri": "file:///Users/chris/.pub-cache/hosted/pub.dartlang.org/http_multi_server-3.2.1",
       "packageUri": "lib/",
@@ -407,10 +413,10 @@
       "name": "generators",
       "rootUri": "../",
       "packageUri": "lib/",
-      "languageVersion": "2.7"
+      "languageVersion": "2.12"
     }
   ],
-  "generated": "2022-10-21T13:35:23.507293Z",
+  "generated": "2022-10-21T14:06:58.756942Z",
   "generator": "pub",
   "generatorVersion": "2.18.2"
 }
