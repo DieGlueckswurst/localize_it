@@ -3,9 +3,9 @@ description: Annotation for localize_it code generation. This package does nothi
 homepage: https://github.com/DieGlueckswurst/localize_it
 repository: https://github.com/DieGlueckswurst/localize_it
 issue_tracker: https://github.com/DieGlueckswurst/localize_it/issues
-version: 1.0.0
+version: 1.0.1
 environment:
-  sdk: ">=2.0.0 <3.0.0"
+  sdk: ">=2.17.6 <3.0.0"
 dependencies:
 dev_dependencies:
   test: 1.3.4

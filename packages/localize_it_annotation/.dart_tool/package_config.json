@@ -311,10 +311,10 @@
       "name": "localize_it_annotation",
       "rootUri": "../",
       "packageUri": "lib/",
-      "languageVersion": "2.0"
+      "languageVersion": "2.17"
     }
   ],
-  "generated": "2022-10-21T12:59:00.102664Z",
+  "generated": "2022-10-21T22:31:33.513825Z",
   "generator": "pub",
   "generatorVersion": "2.18.2"
 }
