@@ -14,12 +14,6 @@
       "languageVersion": "2.17"
     },
     {
-      "name": "annotations",
-      "rootUri": "../../annotations",
-      "packageUri": "lib/",
-      "languageVersion": "2.0"
-    },
-    {
       "name": "args",
       "rootUri": "file:///Users/chris/.pub-cache/hosted/pub.dartlang.org/args-2.3.1",
       "packageUri": "lib/",
@@ -204,6 +198,12 @@
       "rootUri": "file:///Users/chris/.pub-cache/hosted/pub.dartlang.org/json_annotation-4.7.0",
       "packageUri": "lib/",
       "languageVersion": "2.17"
+    },
+    {
+      "name": "localize_it_annotation",
+      "rootUri": "file:///Users/chris/.pub-cache/hosted/pub.dartlang.org/localize_it_annotation-1.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.0"
     },
     {
       "name": "logging",
@@ -410,7 +410,7 @@
       "languageVersion": "2.7"
     }
   ],
-  "generated": "2022-10-21T09:16:54.400968Z",
+  "generated": "2022-10-21T13:35:23.507293Z",
   "generator": "pub",
   "generatorVersion": "2.18.2"
 }

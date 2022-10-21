@@ -7,11 +7,10 @@ environment:
   sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
+  localize_it_annotation: ^1.0.0
   analyzer: ^5.1.0
   build:
   source_gen:
-  annotations:
-    path: ../annotations/
 
 dev_dependencies:
   build_test:

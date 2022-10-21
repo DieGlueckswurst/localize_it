@@ -1,4 +1,4 @@
-import 'package:annotations/annotations.dart';
+import 'package:localize_it_annotation/localize_it_annotation.dart';
 
 @localize_it
 class LocaleConfiguration {
