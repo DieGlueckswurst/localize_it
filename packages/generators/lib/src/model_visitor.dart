@@ -1,13 +1,14 @@
+import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/visitor.dart';
 import 'package:analyzer/dart/element/element.dart';
 
 class ModelVisitor extends SimpleElementVisitor<dynamic> {
   String className;
 
-  Map<dynamic, dynamic> fields = <dynamic, dynamic>{};
+  // Map<dynamic, dynamic> fields = <dynamic, dynamic>{};
 
-  List<String> supportedLanguageCodes;
-  String baseLanguage;
+  List<String> supportedLanguageCodes = [];
+  String baseLanguageCode;
 
   String location;
   dynamic dynamicLocation;
@@ -32,23 +33,17 @@ class ModelVisitor extends SimpleElementVisitor<dynamic> {
   @override
   dynamic visitFieldElement(FieldElement element) {
     location = element.source.fullName;
-    final type = element.type.toString().replaceAll('*', '');
 
     final valueRaw = element.computeConstantValue();
 
     if (valueRaw.toStringValue() != null) {
-      fields[type] = valueRaw.toStringValue();
-    }
-    if (valueRaw.toListValue() != null) {
-      fields[type] = valueRaw.toListValue();
-    }
+      baseLanguageCode = valueRaw.toStringValue();
+    } else if (valueRaw.toListValue() != null) {
+      final list = valueRaw.toListValue();
 
-    fields[type] = valueRaw;
+      for (final object in list) {
+        supportedLanguageCodes.add(object.toStringValue());
+      }
+    }
   }
-
-  // @override
-  // dynamic visitLabelElement(LabelElement element) {
-  //   labelName = element.name;
-  //   // return super.visitLabelElement(element);
-  // }
 }

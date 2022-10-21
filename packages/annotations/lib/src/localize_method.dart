@@ -1,5 +1,5 @@
-class LocalizedAnnotation {
-  const LocalizedAnnotation();
+class LocalizeItAnnotation {
+  const LocalizeItAnnotation();
 }
 
-const localized = LocalizedAnnotation();
+const localize_it = LocalizeItAnnotation();
