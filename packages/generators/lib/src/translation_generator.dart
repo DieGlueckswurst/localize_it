@@ -21,6 +21,9 @@ class TranslationGenerator
   late String baseFilePath;
   late String localizationFilePath;
 
+  int missingLocalizationsCounter = 0;
+  int successfullyLocalizedCounter = 0;
+
   @override
   Future<void> generateForAnnotatedElement(
     Element element,
@@ -33,8 +36,6 @@ class TranslationGenerator
     element.visitChildren(
       visitor,
     );
-
-    stdout.writeln(visitor.location);
 
     final rawLocation = visitor.location;
 
@@ -101,11 +102,15 @@ class TranslationGenerator
   /// }
   /// ```
   Future<Map<String, List<String>>> _getFileNamesWithTranslations() async {
-    stdout.writeln('Getting all Strings to translate...\n');
+    stdout.writeln('\n');
+
+    stdout.writeln('Getting all Strings to localize...\n');
 
     final currentDir = Directory.current;
 
+    /// Keeps track of all the words to translate to avoid duplicates
     final allStringsToTranslate = List<String>.empty(growable: true);
+
     final fileNamesWithTranslation = <String, List<String>>{};
 
     try {
@@ -122,11 +127,12 @@ class TranslationGenerator
         final wordMatches = matchTranslationExtension.allMatches(fileContent);
 
         for (final wordMatch in wordMatches) {
-          final word = wordMatch.group(0);
+          final word = wordMatch.group(0)!;
 
-          if (!allStringsToTranslate.contains(word)) {
-            allStringsToTranslate.add(word!);
-            translationForSpecificFile.add(_removeLastThreeChars(word));
+          final wordCleaned = _cleanWord(word);
+          if (!allStringsToTranslate.contains(wordCleaned)) {
+            allStringsToTranslate.add(wordCleaned);
+            translationForSpecificFile.add(wordCleaned);
           }
         }
 
@@ -136,10 +142,11 @@ class TranslationGenerator
         }
       });
 
-      stdout.writeln('✅ Done!\n\n');
+      stdout.writeln('✅    Done!\n\n');
       return fileNamesWithTranslation;
     } catch (exception) {
-      stdout.writeln('Something went wrong while translating');
+      stdout.writeln('❌    Something went wrong while localizing. \n');
+      stdout.writeln('      Error: $exception\n\n');
       return fileNamesWithTranslation;
     }
   }
@@ -167,9 +174,15 @@ class TranslationGenerator
     return utf8.decodeStream(readStream);
   }
 
-  /// Helper function to remove the last 3 chars of a [value].
-  String _removeLastThreeChars(String value) =>
-      value.length > 3 ? value.substring(0, value.length - 3) : value;
+  /// Removes the trailing `.tr` but more importantly removes whitespaces
+  /// between the String and `.tr`
+  /// Example:
+  /// Text(
+  ///   'This is a very long String. It goes on and on and on and on'
+  ///    .tr,
+  /// )
+  String _cleanWord(String word) =>
+      word.substring(0, word.lastIndexOf('\'') + 1);
 
   String _basePath(FileSystemEntity fileEntity) =>
       fileEntity.uri.pathSegments.last;
@@ -178,7 +191,7 @@ class TranslationGenerator
   Future<void> _writeTranslationsToBaseFile(
     Map<String, List<String>> fileNamesWithTranslation,
   ) async {
-    stdout.writeln('Updating base translation file...\n');
+    stdout.writeln('Updating base localization file...\n');
 
     await _writeTranslationsToFile(
       await _getBaseFile(),
@@ -189,7 +202,7 @@ class TranslationGenerator
       },
     );
 
-    stdout.writeln('✅ Done!\n\n');
+    stdout.writeln('✅    Done!\n\n');
   }
 
   /// Helper function to get the language of a given localization [file]
@@ -278,7 +291,7 @@ class TranslationGenerator
       );
     });
 
-    stdout.writeln('🍻🍻🍻 Successfully updated translations! 🍻🍻🍻\n\n\n');
+    stdout.writeln('\n🍻🍻🍻 Successfully updated localizations! 🍻🍻🍻\n\n\n');
   }
 
   /// Updates each translation file and keeps track of all
@@ -288,14 +301,17 @@ class TranslationGenerator
     List<String> allTranslations,
     Map<String, List<String>> fileNamesWithTranslation,
   ) async {
-    stdout.writeln('Update translations in ${_basePath(fileEntity)} ...\n');
-    var missingTranslationCounter = 0;
+    // Reset counter for each file
+    successfullyLocalizedCounter = 0;
+    missingLocalizationsCounter = 0;
+
+    stdout.writeln('Update localizations in ${_basePath(fileEntity)} ...\n');
 
     final fileContent = await _readFileContent(fileEntity.path);
     final matchComments = RegExp(r'\/\/.*\n?');
     final keysAndValues = fileContent.replaceAll(matchComments, '');
 
-    Map<String, String?> oldTranslations;
+    Map<String, dynamic> oldTranslations;
 
     try {
       final json = keysAndValues.split('=')[1].replaceAll(r"'", '"').trim();
@@ -304,14 +320,15 @@ class TranslationGenerator
           .replaceFirst(',', '', indexOfLastComma - 1)
           .substring(0, json.length - 2);
 
-      oldTranslations = jsonDecode(validJson) as Map<String, String?>;
+      oldTranslations = jsonDecode(validJson) as Map<String, dynamic>;
     } catch (exception) {
       // if json is invalid oldTranslations are empty
       final message = exception is RangeError
-          ? '❗️Translation file was empty or had an invalid format...\ngenerating from scratch...'
-          : '💡Something went wrong...\ngenerating from scratch...';
+          ? '💡    Localization file was empty or had an invalid format.\n    Generating from scratch...'
+          : '💡    Something went wrong. \n    Generating from scratch...';
       stdout.writeln(message);
-      oldTranslations = <String, String?>{};
+
+      oldTranslations = <String, dynamic>{};
     }
 
     for (final key in [...oldTranslations.keys]) {
@@ -325,8 +342,6 @@ class TranslationGenerator
     final file = File(fileEntity.path);
     final language = _getLanguage(file);
 
-    // oldTranslations[oldTranslationKey]
-
     await _writeTranslationsToFile(
       file,
       fileNamesWithTranslation,
@@ -335,23 +350,29 @@ class TranslationGenerator
         final oldTranslationKey = translation.replaceAll("'", '');
         final isMissing = !oldTranslations.containsKey(oldTranslationKey) ||
             oldTranslations.containsKey(oldTranslationKey) &&
-                (oldTranslations[oldTranslationKey] ?? '').isEmpty ||
+                (oldTranslations[oldTranslationKey] as String? ?? '').isEmpty ||
             oldTranslations[oldTranslationKey] == missingTranslation;
-        if (isMissing) missingTranslationCounter++;
+
+        if (isMissing && !useDeepL) missingLocalizationsCounter++;
 
         final value = isMissing
             ? useDeepL
                 ? await _deepLTranslate(oldTranslationKey, language)
                 : missingTranslation
-            : oldTranslations[oldTranslationKey];
+            : oldTranslations[oldTranslationKey] as String? ?? '';
 
-        sink.writeln("\t$translation: '$value',");
+        sink.writeln("\t$translation: '$value'" + ',');
       },
     );
-
-    stdout.writeln('✅ Done!\n');
     stdout.writeln(
-        '💡  $missingTranslationCounter missing translation${missingTranslationCounter == 1 ? '' : 's'}\n\n');
+      '💡    Localizations missing: $missingLocalizationsCounter',
+    );
+    if (useDeepL) {
+      stdout.writeln(
+        '💡    New Localizations:   $successfullyLocalizedCounter\n',
+      );
+    }
+    stdout.writeln('✅    Done!\n\n');
   }
 
   /// Returns the translation for the given [text] and the [language] in which it should be translated
@@ -372,8 +393,9 @@ class TranslationGenerator
 
       if (response.statusCode != 200) {
         stdout.writeln(
-          '❗️ Something went wrong while translating with DeepL. Maybe check if you provided a valid language code.',
+          '❗️   Something went wrong while translating with DeepL. Maybe check if you provided a valid language code.',
         );
+        missingLocalizationsCounter++;
         return missingTranslation;
       }
 
@@ -382,12 +404,17 @@ class TranslationGenerator
       ) as Map<String, dynamic>?;
 
       if (json != null) {
+        successfullyLocalizedCounter++;
+
         return json['translations'][0]['text'] as String;
       }
 
+      missingLocalizationsCounter++;
+
       return missingTranslation;
     } on Exception {
-      stderr.writeln('❗️ Something went wrong while translating with deepl ');
+      stderr
+          .writeln('❗️    Something went wrong while translating with deepl ');
       return missingTranslation;
     }
   }

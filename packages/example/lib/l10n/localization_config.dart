@@ -6,5 +6,6 @@ class LocaleConfiguration {
 
   static const List<String> supportedLanguageCodes = [
     'en',
+    'es',
   ];
 }
