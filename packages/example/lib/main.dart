@@ -52,7 +52,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   borderRadius: BorderRadius.circular(100)),
               child: Center(
                   child: Text(
-                'Das ist ein ewig langer Text der nervt. Er geht sogar über mehrere Zeilen'
+                'Das ist ein ewig langer Text der nervt. Er geht sogar über mehrere Zeilen. Wenn das funktioniert, freue ich mich sehr.'
                     .tr,
                 style: TextStyle(
                     fontSize: 72,
@@ -63,7 +63,7 @@ class _ProfilePageState extends State<ProfilePage> {
             const SizedBox(
               height: 50,
             ),
-            Text('Das ist ein Test'.tr),
+            Text('Ich habe hunger'.tr),
           ],
         ),
       ),

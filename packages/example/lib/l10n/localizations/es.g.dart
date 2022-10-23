@@ -1,9 +1,6 @@
 final Map<String, String> es = {
 
-	//  test.dart
-	'Du Pisser': 'Tú, meón.',
-	'Das ist ein Test': 'Esta es una prueba',
-
 	//  main.dart
-	'Das ist ein ewig langer Text der nervt. Er geht sogar über mehrere Zeilen': 'Este es un texto eternamente largo que resulta molesto. Incluso se extiende por varias líneas',
+	'Das ist ein ewig langer Text der nervt. Er geht sogar über mehrere Zeilen. Wenn das funktioniert, freue ich mich sehr.': 'Este es un texto eternamente largo que resulta molesto. Incluso se extiende por varias líneas. Si esto funciona, estoy muy contento.',
+	'Ich habe hunger': 'Tengo hambre',
 };

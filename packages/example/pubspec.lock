@@ -193,13 +193,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.0"
-  generators:
-    dependency: "direct dev"
-    description:
-      path: "../generators"
-      relative: true
-    source: path
-    version: "1.0.0"
   glob:
     dependency: transitive
     description:
@@ -256,6 +249,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.7.0"
+  localize_it:
+    dependency: "direct dev"
+    description:
+      path: "../localize_it"
+      relative: true
+    source: path
+    version: "0.0.1"
   localize_it_annotation:
     dependency: "direct main"
     description:
