@@ -1,3 +1,7 @@
+<p align="center">
+<img src="https://raw.githubusercontent.com/DieGlueckswurst/localize_it/master/extensions/vscode/localize-it/assets/logo_transparent.png" height="100" alt="Bloc" />
+</p>
+
 # Overview
 
 [VSCode](https://code.visualstudio.com/) support for the [localize_it Package](https://pub.dev/packages/localize_it) for effectively creating the [Configuration File](https://pub.dev/packages/localize_it) which is the starting point to localize [Flutter Apps](https://flutter.dev/).
