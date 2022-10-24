@@ -1,6 +1,7 @@
 import 'package:analyzer/dart/element/visitor.dart';
 import 'package:analyzer/dart/element/element.dart';
 
+/// Visit Configuration file, marked with `@localize_it`
 class ModelVisitor extends SimpleElementVisitor<dynamic> {
   List<String> supportedLanguageCodes = [];
   late String baseLanguageCode;

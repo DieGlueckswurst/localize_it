@@ -11,6 +11,7 @@ import 'package:source_gen/source_gen.dart';
 
 import 'model_visitor.dart';
 
+/// This is a comment to get Pub Points
 class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
   String baseLanguageCode = '';
   List<String> supportedLanguageCodes = [];

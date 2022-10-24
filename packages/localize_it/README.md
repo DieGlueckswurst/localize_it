@@ -53,8 +53,8 @@ dart pub add --dev localize_it
 This installs three packages:
 
 - [build_runner](https://pub.dev/packages/build_runner), the tool to run code-generators
-- [localize_it], the code generator
-- [localize_it_annotation](https://pub.dev/packages/localize_it_annotation/score), a package containing annotations for [localize_it].
+- [localize_it](https://pub.dev/packages/localize_it), the code generator
+- [localize_it_annotation](https://pub.dev/packages/localize_it_annotation/score), a package containing annotations for [localize_it](https://pub.dev/packages/localize_it).
 
 ## 2. localize_it x GetX
 
