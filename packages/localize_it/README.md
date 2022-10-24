@@ -104,7 +104,7 @@ After installling it you can simply call `localize_it: Create` anywhere inside y
 
 You're ready to go!
 
-# Clean!
+**Clean!**
 
 Make sure to `clean` your project before calling the `build_runner`:
 
