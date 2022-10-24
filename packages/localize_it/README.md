@@ -71,7 +71,7 @@ Lucky for you there is a [VSCode-Extension](https://marketplace.visualstudio.com
 
 After installling it you can simply call `localize_it: Create` anywhere inside your `lib/`. Easy!
 
-<img src="https://media.giphy.com/media/vFKqnCdLPNOKc/giphy.gif" height="400" />
+<img src="https://raw.githubusercontent.com/DieGlueckswurst/localize_it/master/extensions/vscode/localize-it/assets/lit_extension_example_video.gif" height="500" />
 
 
 ## 4. Configure 
@@ -99,6 +99,41 @@ After installling it you can simply call `localize_it: Create` anywhere inside y
 |                           | maps [supportedLanguageCodes] to their localization-files.                    |
 |                           | `translation_keys` can simply be passed to `GetMaterialApp`                   |
 |                           | to enable Localization.                                                       |
+
+## 5. Localize!
+
+You're ready to go!
+
+# Clean!
+
+Make sure to `clean` your project before calling the `build_runner`:
+
+```console
+flutter clean
+flutter pub get
+```
+
+Let `build_runner` do the rest for you:
+
+`flutter pub run build_runner build --delete-conflicting-outputs`
+
+This will find all `Strings` that end with `.tr` in your project and localize them depending on your `baseLanugageCode` and `supportedLanguageCodes`. 
+
+## Good to know
+
+1. *You can always change the translated text in your localization filels. The change/adjust will NOT be overritten when calling the script again.*
+
+2. *You can call the script as often you want. Only the newly added `Strings` will be translated. This increases performance and makes sure that you don't reach your DeepL API limit.*
+
+3. *`Strings` that you removed from your projects but are still in your `localizations` will be removed once you call the script again.*
+
+**Enjoy!**
+
+
+## Open Issues
+
+1. Add Support to differenciate American/British English. 
+2. Having a ",\n" inside a `String` that should get localized will break the generator.
 
 
 
