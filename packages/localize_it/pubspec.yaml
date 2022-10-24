@@ -1,9 +1,9 @@
 name: localize_it
-description: It's lit.
+description: A tool for making localizing your Flutter App easy peasy lemmon squeezy.
 homepage: https://github.com/DieGlueckswurst/localize_it
 repository: https://github.com/DieGlueckswurst/localize_it
 issue_tracker: https://github.com/DieGlueckswurst/localize_it/issues
-version: 0.0.1
+version: 1.0.0
 
 environment:
   sdk: ">=2.17.6 <3.0.0"
