@@ -1,4 +1,8 @@
-Welcome to [localize_it], yet another package for localizing your app.
+<p align="center">
+<img src="https://raw.githubusercontent.com/DieGlueckswurst/localize_it/master/extensions/vscode/localize-it/assets/logo_transparent.png" height="100" alt="Bloc" />
+</p>
+
+Welcome to [localize_it](https://pub.dev/packages/localize_it), yet another package for localizing your app.
 
 # Motivation
 
@@ -92,6 +96,10 @@ After installling it you can simply call `localize_it: Create` anywhere inside y
 |                           | maps [supportedLanguageCodes] to their localization-files.                    |
 |                           | `translation_keys` can simply be passed to `GetMaterialApp`                   |
 |                           | to enable Localization.                                                       |
+
+
+
+
 
 
 
