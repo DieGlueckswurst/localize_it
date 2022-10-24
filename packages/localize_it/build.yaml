@@ -6,9 +6,9 @@ targets:
 
 builders:
   generators:
-    target: ":generators"
-    import: "package:generators/builder.dart"
-    builder_factories: ["generateTranslation"]
+    target: ":localize_it"
+    import: "package:localize_it/localize_it.dart"
+    builder_factories: ["localizeIt"]
     build_extensions: { ".dart": [".g.dart"] }
     auto_apply: dependents
     build_to: cache

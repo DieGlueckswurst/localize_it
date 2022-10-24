@@ -146,6 +146,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "flutter_lints",
+      "rootUri": "file:///Users/chris/.pub-cache/hosted/pub.dartlang.org/flutter_lints-2.0.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
+    },
+    {
       "name": "frontend_server_client",
       "rootUri": "file:///Users/chris/.pub-cache/hosted/pub.dartlang.org/frontend_server_client-3.1.0",
       "packageUri": "lib/",
@@ -159,7 +165,7 @@
     },
     {
       "name": "graphs",
-      "rootUri": "file:///Users/chris/.pub-cache/hosted/pub.dartlang.org/graphs-2.1.0",
+      "rootUri": "file:///Users/chris/.pub-cache/hosted/pub.dartlang.org/graphs-2.2.0",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -206,10 +212,16 @@
       "languageVersion": "2.17"
     },
     {
-      "name": "localize_it_annotation",
-      "rootUri": "file:///Users/chris/.pub-cache/hosted/pub.dartlang.org/localize_it_annotation-1.0.0",
+      "name": "lints",
+      "rootUri": "file:///Users/chris/.pub-cache/hosted/pub.dartlang.org/lints-2.0.1",
       "packageUri": "lib/",
-      "languageVersion": "2.0"
+      "languageVersion": "2.17"
+    },
+    {
+      "name": "localize_it_annotation",
+      "rootUri": "file:///Users/chris/.pub-cache/hosted/pub.dartlang.org/localize_it_annotation-1.0.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
     },
     {
       "name": "logging",
@@ -410,13 +422,13 @@
       "languageVersion": "2.12"
     },
     {
-      "name": "generators",
+      "name": "localize_it",
       "rootUri": "../",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "2.17"
     }
   ],
-  "generated": "2022-10-21T14:06:58.756942Z",
+  "generated": "2022-10-22T10:34:21.599747Z",
   "generator": "pub",
   "generatorVersion": "2.18.2"
 }

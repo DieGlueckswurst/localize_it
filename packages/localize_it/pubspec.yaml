@@ -1,11 +1,23 @@
-name: localize_it_annotation
-description: Annotation for localize_it code generation. This package does nothing without localize_it too.
+name: localize_it
+description: It's lit.
 homepage: https://github.com/DieGlueckswurst/localize_it
 repository: https://github.com/DieGlueckswurst/localize_it
 issue_tracker: https://github.com/DieGlueckswurst/localize_it/issues
-version: 2.0.0
+version: 0.0.1
+
 environment:
   sdk: ">=2.17.6 <3.0.0"
+
 dependencies:
+  localize_it_annotation: ^1.0.0
+  analyzer: ^5.1.0
+  build: ^2.3.1
+  source_gen: ^1.2.6
+  http: ^0.13.5
+
 dev_dependencies:
-  test: 1.3.4
+  build_test:
+  build_runner:
+  test: ^1.0.0
+  flutter_lints: ^2.0.0
+

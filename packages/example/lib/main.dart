@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/route_manager.dart';
+
+import 'l10n/translation_keys.dart';
+
+// import 'l10n/translation_keys.dart';
 // import 'profile_model.dart';
 
 void main() {
@@ -10,7 +15,8 @@ class CodeGenExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return const GetMaterialApp(
+      translationsKeys: translationsKeys,
       home: ProfilePage(),
     );
   }

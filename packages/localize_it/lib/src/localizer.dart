@@ -2,21 +2,22 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:build/build.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:build/src/builder/build_step.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:localize_it_annotation/localize_it_annotation.dart';
 import 'package:source_gen/source_gen.dart';
 
 import 'model_visitor.dart';
 
-class TranslationGenerator
-    extends GeneratorForAnnotation<LocalizeItAnnotation> {
+class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
   String baseLanguageCode = '';
   List<String> supportedLanguageCodes = [];
 
-  bool useDeepL = true;
+  late bool useDeepL;
+  late String deepLAuthKey;
+  late bool useGetX;
 
   late String baseFilePath;
   late String localizationFilePath;
@@ -36,6 +37,10 @@ class TranslationGenerator
     element.visitChildren(
       visitor,
     );
+
+    deepLAuthKey = visitor.deepLAuthKey;
+    useDeepL = deepLAuthKey.isNotEmpty;
+    useGetX = visitor.useGetX;
 
     final rawLocation = visitor.location;
 
@@ -58,7 +63,7 @@ class TranslationGenerator
 
     // Make Directory for Base Localization
     final baseLocalizationDir = Directory(
-      localizationsDirectory.path + '/base',
+      '${localizationsDirectory.path}/base',
     );
 
     if (!baseLocalizationDir.existsSync()) {
@@ -73,7 +78,46 @@ class TranslationGenerator
 
     await translate();
 
+    if (useGetX) {
+      await _generateTranslationKeysForGetX(pathForDirectory);
+    }
+
     return;
+  }
+
+  /// Maps [supportedLanguageCodes] to their localizations-files.
+  /// `translation_keys` can simply be passed to `GetMaterialApp`
+  /// to enable Localization.
+  Future<void> _generateTranslationKeysForGetX(String path) async {
+    const fileName = 'translation_keys.dart';
+    final filePath = '$path/$fileName';
+    File file = File(filePath);
+
+    if (!file.existsSync()) {
+      await file.create();
+    }
+    final sink = file.openWrite();
+    const relativeDirectoryPathForLocalizations = 'localizations/';
+
+    sink.writeln(
+      'import \'$relativeDirectoryPathForLocalizations/base/$baseLanguageCode.g.dart\';',
+    );
+    for (String code in supportedLanguageCodes) {
+      sink.writeln(
+        'import \'$relativeDirectoryPathForLocalizations$code.g.dart\';',
+      );
+    }
+    sink.write('\n');
+
+    sink.writeln('const Map<String, Map<String, String>> translationsKeys = {');
+    sink.writeln('\t\'$baseLanguageCode\': $baseLanguageCode,');
+    for (String code in supportedLanguageCodes) {
+      sink.writeln('\t\'$code\': $code,');
+    }
+    sink.writeln('};');
+
+    await sink.flush();
+    await sink.close();
   }
 
   Future<void> translate() async {
@@ -217,7 +261,7 @@ class TranslationGenerator
   /// [writeKeyAndValue] is a callback function for a custom implementation on how to write
   /// the key and value of [fileNameWithTranslation].
   /// You should not flush the IOSink that get's passed to [writeKeyAndValue], because that happens at the end of this function.
-  /// Creates a file with the [language] as a name
+  /// Creates a file with the [language] as a name.
   Future<void> _writeTranslationsToFile(
     File file,
     Map<String, List<String>> fileNamesWithTranslation, {
@@ -226,7 +270,7 @@ class TranslationGenerator
   }) async {
     final sink = file.openWrite();
 
-    sink.writeln('final Map<String, String> $language = {');
+    sink.writeln('const Map<String, String> $language = {');
 
     // inkrementelles update von den files und nicht immer alles neuschreiben
     await Future.forEach(fileNamesWithTranslation.entries, (
@@ -251,7 +295,7 @@ class TranslationGenerator
     final localizationFiles = <File>[];
     for (final code in supportedLanguageCodes) {
       final file = File(
-        localizationFilePath + '/$code.g.dart',
+        '$localizationFilePath/$code.g.dart',
       );
       if (!file.existsSync()) {
         await file.create();
@@ -263,7 +307,7 @@ class TranslationGenerator
 
   Future<File> _getBaseFile() async {
     final file = File(
-      baseFilePath + '/$baseLanguageCode.g.dart',
+      '$baseFilePath/$baseLanguageCode.g.dart',
     );
     if (!file.existsSync()) {
       await file.create();
@@ -278,10 +322,6 @@ class TranslationGenerator
     Map<String, List<String>> fileNamesWithTranslation,
   ) async {
     final localizationFiles = await _getLocalizationFiles();
-
-    // final filteredFiles = translationFiles
-    //     .whereType<File>()
-    //     .where((file) => !file.path.contains('/base'));
 
     await Future.forEach(localizationFiles, (File file) async {
       await _updateTranslations(
@@ -308,31 +348,34 @@ class TranslationGenerator
     stdout.writeln('Update localizations in ${_basePath(fileEntity)} ...\n');
 
     final fileContent = await _readFileContent(fileEntity.path);
-    final matchComments = RegExp(r'\/\/.*\n?');
-    final keysAndValues = fileContent.replaceAll(matchComments, '');
 
-    Map<String, dynamic> oldTranslations;
+    Map<String, String> oldTranslations = {};
 
-    try {
-      final json = keysAndValues.split('=')[1].replaceAll(r"'", '"').trim();
-      final indexOfLastComma = json.lastIndexOf(',');
-      final validJson = json
-          .replaceFirst(',', '', indexOfLastComma - 1)
-          .substring(0, json.length - 2);
+    if (fileContent.isNotEmpty) {
+      final matchComments = RegExp(r'\/\/.*\n?');
+      // Remove Comments
+      var keysAndValues = fileContent.replaceAll(matchComments, '');
+      // Remove first line
+      keysAndValues = keysAndValues.split('= {')[1].trim();
+      // Remove last closing curly bracket
+      keysAndValues.substring(0, keysAndValues.length - 1);
 
-      oldTranslations = jsonDecode(validJson) as Map<String, dynamic>;
-    } catch (exception) {
-      // if json is invalid oldTranslations are empty
-      final message = exception is RangeError
-          ? '💡    Localization file was empty or had an invalid format.\n    Generating from scratch...'
-          : '💡    Something went wrong. \n    Generating from scratch...';
-      stdout.writeln(message);
+      final splittedKeysAndValues = keysAndValues.split(',\n');
 
-      oldTranslations = <String, dynamic>{};
+      for (final keyAndValue in splittedKeysAndValues) {
+        // Last element is empty so this check is neccessary
+        if (keyAndValue.contains('\':')) {
+          final keyAndValueSeperated = keyAndValue.split('\':');
+          // Add single quote for key since it was removed when splitting it
+          oldTranslations['${keyAndValueSeperated[0].trim()}\''] =
+              keyAndValueSeperated[1].trim();
+        }
+      }
     }
 
+    // Remove translations from file that are no longer in the project
     for (final key in [...oldTranslations.keys]) {
-      if (!allTranslations.contains("'$key'")) {
+      if (!allTranslations.contains(key)) {
         oldTranslations.remove(key);
       }
     }
@@ -346,33 +389,56 @@ class TranslationGenerator
       file,
       fileNamesWithTranslation,
       language: language,
-      writeKeyAndValue: (translation, sink) async {
-        final oldTranslationKey = translation.replaceAll("'", '');
-        final isMissing = !oldTranslations.containsKey(oldTranslationKey) ||
-            oldTranslations.containsKey(oldTranslationKey) &&
-                (oldTranslations[oldTranslationKey] as String? ?? '').isEmpty ||
+      writeKeyAndValue: (oldTranslationKey, sink) async {
+        final entryExistsForTranslation =
+            oldTranslations.containsKey(oldTranslationKey);
+
+        final entryExistsButIsEmpty = entryExistsForTranslation &&
+            (oldTranslations[oldTranslationKey] ?? '').isEmpty;
+
+        final entryExistsButIsMissingTranslation =
             oldTranslations[oldTranslationKey] == missingTranslation;
 
-        if (isMissing && !useDeepL) missingLocalizationsCounter++;
+        final isMissing = !entryExistsForTranslation ||
+            entryExistsButIsEmpty ||
+            entryExistsButIsMissingTranslation;
 
-        final value = isMissing
+        if (isMissing && !useDeepL) {
+          missingLocalizationsCounter++;
+        }
+
+        var value = isMissing
             ? useDeepL
-                ? await _deepLTranslate(oldTranslationKey, language)
+                ? await _deepLTranslate(
+                    _removeFirstAndLastCharacter(
+                      oldTranslationKey,
+                    ),
+                    language,
+                  )
                 : missingTranslation
-            : oldTranslations[oldTranslationKey] as String? ?? '';
+            : oldTranslations[oldTranslationKey] ?? '';
 
-        sink.writeln("\t$translation: '$value'" + ',');
+        sink.writeln("\t$oldTranslationKey: $value,");
       },
     );
     stdout.writeln(
-      '💡    Localizations missing: $missingLocalizationsCounter',
+      '💡    Missing Localizations: $missingLocalizationsCounter',
     );
     if (useDeepL) {
       stdout.writeln(
-        '💡    New Localizations:   $successfullyLocalizedCounter\n',
+        '💡    New Localizations:     $successfullyLocalizedCounter\n',
       );
     }
     stdout.writeln('✅    Done!\n\n');
+  }
+
+  /// Helper function used to get the raw String without
+  /// leading and trailing single quote
+  String _removeFirstAndLastCharacter(String string) {
+    return string.substring(
+      1,
+      string.length - 1,
+    );
   }
 
   /// Returns the translation for the given [text] and the [language] in which it should be translated
@@ -383,7 +449,7 @@ class TranslationGenerator
       final url = Uri.https('api-free.deepl.com', '/v2/translate');
 
       final body = <String, dynamic>{
-        'auth_key': '5bcb1202-12d5-2e63-f8ca-b087c47cad1b:fx',
+        'auth_key': deepLAuthKey,
         'text': text,
         'target_lang': language,
         'source_lang': baseLanguageCode.toUpperCase(),
@@ -393,7 +459,7 @@ class TranslationGenerator
 
       if (response.statusCode != 200) {
         stdout.writeln(
-          '❗️   Something went wrong while translating with DeepL. Maybe check if you provided a valid language code.',
+          '❗️   Something went wrong while translating with DeepL.',
         );
         missingLocalizationsCounter++;
         return missingTranslation;
@@ -406,15 +472,25 @@ class TranslationGenerator
       if (json != null) {
         successfullyLocalizedCounter++;
 
-        return json['translations'][0]['text'] as String;
+        var text = json['translations'][0]['text'] as String;
+
+        /// Makes sure to skip single-quotes in actual Strings.
+        /// Escpecially common for English (e.g. "I'm Christian.").
+        text = text.replaceAll('\'', '\\\'');
+
+        return '\'$text\'';
       }
 
       missingLocalizationsCounter++;
 
       return missingTranslation;
     } on Exception {
-      stderr
-          .writeln('❗️    Something went wrong while translating with deepl ');
+      stderr.writeln(
+        '❗️    Something went wrong while translating with DeepL.',
+      );
+      stderr.writeln(
+        '❗️    Make sure that you are connected to the Internet.',
+      );
       return missingTranslation;
     }
   }

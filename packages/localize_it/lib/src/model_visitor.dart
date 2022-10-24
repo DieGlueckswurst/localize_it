@@ -1,29 +1,17 @@
-import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/visitor.dart';
 import 'package:analyzer/dart/element/element.dart';
 
 class ModelVisitor extends SimpleElementVisitor<dynamic> {
-  late String className;
-
-  // Map<dynamic, dynamic> fields = <dynamic, dynamic>{};
-
   List<String> supportedLanguageCodes = [];
   late String baseLanguageCode;
 
+  late String deepLAuthKey;
+
   late String location;
-  dynamic dynamicLocation;
 
   late String mapName;
 
-  @override
-  dynamic visitConstructorElement(ConstructorElement element) {
-    final elementReturnType = element.type.returnType.toString();
-
-    // DartType ends with '*', which needs to be eliminated
-    // for the generated code to be accurate.
-
-    className = elementReturnType.replaceFirst('*', '');
-  }
+  late bool useGetX;
 
   @override
   dynamic visitLibraryElement(LibraryElement element) {
@@ -35,15 +23,22 @@ class ModelVisitor extends SimpleElementVisitor<dynamic> {
     location = element.source!.fullName;
 
     final valueRaw = element.computeConstantValue();
+    element.name;
 
     if (valueRaw?.toStringValue() != null) {
-      baseLanguageCode = valueRaw!.toStringValue()!;
+      if (element.name == 'baseLanguageCode') {
+        baseLanguageCode = valueRaw!.toStringValue()!;
+      } else if (element.name == 'deepLAuthKey') {
+        deepLAuthKey = valueRaw!.toStringValue()!;
+      }
     } else if (valueRaw?.toListValue() != null) {
       final list = valueRaw?.toListValue();
 
       for (final object in list!) {
         supportedLanguageCodes.add(object.toStringValue()!);
       }
+    } else if (valueRaw?.toBoolValue() != null) {
+      useGetX = valueRaw!.toBoolValue()!;
     }
   }
 }
