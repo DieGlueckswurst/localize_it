@@ -1,5 +1,5 @@
 <p align="center">
-<img src="https://raw.githubusercontent.com/DieGlueckswurst/localize_it/master/extensions/vscode/localize-it/assets/logo_transparent.png" height="100" alt="Bloc" />
+<img src="https://raw.githubusercontent.com/DieGlueckswurst/localize_it/master/extensions/vscode/localize-it/assets/logo_transparent.png" height="100" alt="localize_it" />
 </p>
 
 Welcome to [localize_it](https://pub.dev/packages/localize_it), yet another package for localizing your app.
@@ -70,6 +70,9 @@ Next Step is to setup a config-file. Writing code by yourself? Haha.
 Lucky for you there is a [VSCode-Extension](https://marketplace.visualstudio.com/items?itemName=DieGlckswurst.localize-it).
 
 After installling it you can simply call `localize_it: Create` anywhere inside your `lib/`. Easy!
+
+<img src="https://media.giphy.com/media/vFKqnCdLPNOKc/giphy.gif" height="400" />
+
 
 ## 4. Configure 
 
