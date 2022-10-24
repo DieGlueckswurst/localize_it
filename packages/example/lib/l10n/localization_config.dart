@@ -29,7 +29,7 @@ class LocaleConfiguration {
   /// Defaults to: `['en' (English), 'es' (Spanish)]`
   static const List<String> supportedLanguageCodes = [
     'en',
-    // 'es',
+    'es',
   ];
 
   /// Providing a `deepLAuthKey` enables translation generation
