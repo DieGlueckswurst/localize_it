@@ -1,6 +1,6 @@
 # Overview
 
-[VSCode](https://code.visualstudio.com/) support for the [localize_it Package](https://bloclibrary.dev) for effectively creating the [Configuration File](https://github.com/felangel/bloc) which is the starting point to localize [Flutter Apps](https://flutter.dev/).
+[VSCode](https://code.visualstudio.com/) support for the [localize_it Package](https://pub.dev/packages/localize_it) for effectively creating the [Configuration File](https://pub.dev/packages/localize_it) which is the starting point to localize [Flutter Apps](https://flutter.dev/).
 
 
 ## Installation
