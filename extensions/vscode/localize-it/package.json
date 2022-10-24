@@ -3,10 +3,11 @@
   "displayName": "localize_it",
   "description": "Support for the localize_it Package for effectively creating the Configuration-File which is the starting point to localize your Flutter Apps.",
   "publisher": "DieGlckswurst",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "engines": {
     "vscode": "^1.72.0"
   },
+  "icon": "assets/logo_transparent.png",
   "categories": [
     "Other"
   ],
