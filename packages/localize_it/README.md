@@ -100,7 +100,19 @@ After installling it you can simply call `localize_it: Create` anywhere inside y
 |                           | `translation_keys` can simply be passed to `GetMaterialApp`                   |
 |                           | to enable Localization.                                                       |
 
-## 5. Localize!
+
+## 5. Disable generate
+
+For the `build_runner` to work you must **disable** `generate` in your `pubspec.yaml`:
+
+```console
+flutter:
+  # generate: true
+```
+
+See more on this [issue](https://github.com/dart-lang/build/issues/2835#issuecomment-702511142).
+
+## 6. Localize!
 
 You're ready to go!
 
@@ -115,7 +127,9 @@ flutter pub get
 
 Let `build_runner` do the rest for you:
 
+```console
 `flutter pub run build_runner build --delete-conflicting-outputs`
+```
 
 This will find all `Strings` that end with `.tr` in your project and localize them depending on your `baseLanugageCode` and `supportedLanguageCodes`. 
 
