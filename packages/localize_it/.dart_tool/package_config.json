@@ -219,7 +219,7 @@
     },
     {
       "name": "localize_it_annotation",
-      "rootUri": "file:///Users/chris/.pub-cache/hosted/pub.dartlang.org/localize_it_annotation-1.0.1",
+      "rootUri": "file:///Users/chris/.pub-cache/hosted/pub.dartlang.org/localize_it_annotation-2.0.0",
       "packageUri": "lib/",
       "languageVersion": "2.17"
     },
@@ -428,7 +428,7 @@
       "languageVersion": "2.17"
     }
   ],
-  "generated": "2022-10-24T16:45:20.502403Z",
+  "generated": "2022-10-25T07:24:53.829124Z",
   "generator": "pub",
   "generatorVersion": "2.18.2"
 }
