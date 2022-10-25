@@ -128,7 +128,7 @@ flutter pub get
 Let `build_runner` do the rest for you:
 
 ```console
-`flutter pub run build_runner build --delete-conflicting-outputs`
+flutter pub run build_runner build --delete-conflicting-outputs
 ```
 
 This will find all `Strings` that end with `.tr` in your project and localize them depending on your `baseLanugageCode` and `supportedLanguageCodes`. 
