@@ -1,3 +1,15 @@
+## 1.0.8
+
+- fixed missing translation 
+
+## 1.0.7
+
+- Version solving
+
+## 1.0.6
+
+- Downgrade Analyzer Version
+
 ## 1.0.5
 
 - Upgraded dependencies

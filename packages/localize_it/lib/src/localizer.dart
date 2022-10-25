@@ -381,7 +381,7 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
       }
     }
 
-    const missingTranslation = '--missing translation--';
+    const missingTranslation = '\'--missing translation--\'';
 
     final file = File(fileEntity.path);
     final language = _getLanguage(file);
@@ -445,7 +445,8 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
   /// Returns the translation for the given [text] and the [language] in which it should be translated
   /// via the DeepL API
   Future<String> _deepLTranslate(String text, String language) async {
-    const missingTranslation = '--missing translation--';
+    const missingTranslation = '\'--missing translation--\'';
+
     try {
       final url = Uri.https('api-free.deepl.com', '/v2/translate');
 
