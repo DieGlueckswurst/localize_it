@@ -1,3 +1,7 @@
+## 1.0.9
+
+- Added `generate` bug to README
+
 ## 1.0.8
 
 - fixed missing translation 
