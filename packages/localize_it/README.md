@@ -146,8 +146,10 @@ This will find all `Strings` that end with `.tr` in your project and localize th
 
 ## Open Issues
 
-1. Add Support to differenciate American/British English. 
-2. Having a ",\n" inside a `String` that should get localized will break the generator.
+1. Add Support to differenciate American/British English
+2. Having a ",\n" inside a `String` that should get localized will break the generator
+3. Having a Single Quote as Key 
+4. Get `deepLAuthKey` from `.env`
 
 
 
