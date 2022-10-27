@@ -1,3 +1,7 @@
+## 1.1.0
+
+- Resolved Issue having Single Quotes inside `Strings`.
+
 ## 1.0.9
 
 - Added `generate` bug to README

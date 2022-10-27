@@ -175,6 +175,7 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
           final word = wordMatch.group(0)!;
 
           final wordCleaned = _cleanWord(word);
+
           if (!allStringsToTranslate.contains(wordCleaned)) {
             allStringsToTranslate.add(wordCleaned);
             translationForSpecificFile.add(wordCleaned);
@@ -222,10 +223,12 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
   /// Removes the trailing `.tr` but more importantly removes whitespaces
   /// between the String and `.tr`
   /// Example:
+  /// ```
   /// Text(
   ///   'This is a very long String. It goes on and on and on and on'
   ///    .tr,
   /// )
+  /// ```
   String _cleanWord(String word) =>
       word.substring(0, word.lastIndexOf('\'') + 1);
 
@@ -476,9 +479,9 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
 
         var text = json['translations'][0]['text'] as String;
 
-        /// Makes sure to skip single-quotes in actual Strings.
-        /// Escpecially common for English (e.g. "I'm Christian.").
-        text = text.replaceAll('\'', '\\\'');
+        text = _escapeSingleQuotes(text);
+        // Remove double escape characters
+        text = text.replaceAll("\\\\'", "\\'");
 
         return '\'$text\'';
       }
@@ -495,5 +498,11 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
       );
       return missingTranslation;
     }
+  }
+
+  /// Makes sure to skip single-quotes in actual Strings.
+  /// Escpecially common for English (e.g. "I'm Christian.").
+  String _escapeSingleQuotes(String word) {
+    return word.replaceAll('\'', '\\\'');
   }
 }

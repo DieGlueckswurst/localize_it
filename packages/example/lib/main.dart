@@ -63,7 +63,8 @@ class _ProfilePageState extends State<ProfilePage> {
             const SizedBox(
               height: 50,
             ),
-            Text('Ich habe h\n,unger'.tr),
+            Text('I\'m Chris.'.tr),
+            Text('Wie geht\'s? Mir geht\'s gut.'.tr),
           ],
         ),
       ),
