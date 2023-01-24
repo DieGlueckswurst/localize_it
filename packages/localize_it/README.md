@@ -77,28 +77,34 @@ After installling it you can simply call `localize_it: Create` anywhere inside y
 ## 4. Configure 
 
 | Field                     | Description                                                                   |
-| ------------------------- | ----------------------------------------------------------------------------- |
+|---------------------------|-------------------------------------------------------------------------------|
 | `baseLanguageCode`        | `String` that expects a lanugage code in **lowercase**.                       |
 |                           | Supports all the currently available Source Languages (`source_lang`)         |
 |                           | on [DeepL](https://www.deepl.com/de/docs-api/translate-text/translate-text/). |
 |                           | Defaults to: `'de' (German)`                                                  |
-| ------------------------- | ----------------------------------------------------------------------------- |
+|---------------------------|-------------------------------------------------------------------------------|
 | `supportedLanguageCodes`  | `List<String` that expects lanugage codes in **lowercase**.                   |
 |                           | Should *not* contain `baseLanguageCode`                                       |
 |                           | Supports all the currently available Target Languages (`target_lang`)         |
 |                           | on [DeepL](https://www.deepl.com/de/docs-api/translate-text/translate-text/). |
 |                           | Defaults to: `['en' (English), 'es' (Spanish)]`                               |
-| ------------------------- | ----------------------------------------------------------------------------- |
+|---------------------------|-------------------------------------------------------------------------------|
 | `deepLAuthKey`            | `String` that expects your *DeepL Auth Key*                                   |
 |                           | Providing a `deepLAuthKey` enables translation generation                     |
 |                           | via the [DeepL API](https://www.deepl.com/de/pro-api?cta=header-pro-api/).    |
 |                           | If no key is provided (empty String), all *marked Strings* (end with `.tr`)   |
 |                           | in your project will get translated to `'--missing translation--'`.           |
-| ------------------------- | ----------------------------------------------------------------------------- |
+|---------------------------|-------------------------------------------------------------------------------|
 | `useGetX`                 | If `true` a file called `translation_keys.dart` is created that               |
 |                           | maps [supportedLanguageCodes] to their localization-files.                    |
 |                           | `translation_keys` can simply be passed to `GetMaterialApp`                   |
 |                           | to enable Localization.                                                       |
+|---------------------------|-------------------------------------------------------------------------------|
+| `preferDoubleQuotes`      | By default localize_it is searching for `Strings` in *singel-quotes*.         |
+|                           | See [prefer_single_quotes](https://dart-lang.github.io/linter/lints/prefer_single_quotes.html) for more info.                    |
+|                           | However if you prefer using double quotes in your project you can do this     |
+|                           | by setting  `preferDoubleQuotes` to  `true`.                                  |
+
 
 
 ## 5. Disable generate

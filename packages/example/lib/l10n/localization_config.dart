@@ -26,13 +26,13 @@ class LocaleConfiguration {
   /// via the [DeepL API](https://www.deepl.com/de/pro-api?cta=header-pro-api/).
   /// If no key is provided (empty String), all *marked Strings* (end with `.tr`) in your project
   /// will get translated to `'--missing translation--'.`
-  static const String deepLAuthKey = '5bcb1202-12d5-2e63-f8ca-b087c47cad1b:fx';
+  static const String deepLAuthKey = '';
 
   /// Enabling `useGetX` generates `Map<String, Map<String,String>> translationKeys` which can
   /// simply be passed to `GetMaterialApp`.
   static const bool useGetX = true;
 
-  /// By default localize_it is searching for `Strings` in *singel-quotes*,
+  /// By default localize_it is searching for `Strings` in *singel-quotes*.
   /// See [prefer_single_quotes](https://dart-lang.github.io/linter/lints/prefer_single_quotes.html) for more info.
   /// However if you prefer using double quotes in your project you can do this by settings
   /// `preferDoubleQuotes` to  `true`.
