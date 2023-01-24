@@ -31,4 +31,10 @@ class LocaleConfiguration {
   /// Enabling `useGetX` generates `Map<String, Map<String,String>> translationKeys` which can
   /// simply be passed to `GetMaterialApp`.
   static const bool useGetX = true;
+
+  /// By default localize_it is searching for `Strings` in *singel-quotes*,
+  /// See [prefer_single_quotes](https://dart-lang.github.io/linter/lints/prefer_single_quotes.html) for more info.
+  /// However if you prefer using double quotes in your project you can do this by settings
+  /// `preferDoubleQuotes` to  `true`.
+  static const bool preferDoubleQuotes = true;
 }

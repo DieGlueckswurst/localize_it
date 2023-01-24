@@ -19,12 +19,16 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
   late bool useDeepL;
   late String deepLAuthKey;
   late bool useGetX;
+  late bool preferDoubleQuotes;
 
   late String baseFilePath;
   late String localizationFilePath;
 
   int missingLocalizationsCounter = 0;
   int successfullyLocalizedCounter = 0;
+
+  late final escapedQuote;
+  late final missingTranslationPlaceholderText;
 
   @override
   Future<void> generateForAnnotatedElement(
@@ -42,6 +46,11 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
     deepLAuthKey = visitor.deepLAuthKey;
     useDeepL = deepLAuthKey.isNotEmpty;
     useGetX = visitor.useGetX;
+    preferDoubleQuotes = visitor.preferDoubleQuotes;
+
+    escapedQuote = preferDoubleQuotes ? '"' : '\'';
+    missingTranslationPlaceholderText =
+        '$escapedQuote--missing translation--$escapedQuote';
 
     final rawLocation = visitor.location;
 
@@ -167,8 +176,9 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
 
         final fileContent = await _readFileContent(fileEntity.path);
 
-        final matchTranslationExtension =
-            RegExp(r"('[^'\\]*(?:\\.[^'\\]*)*'\s*\.tr\b)");
+        final matchTranslationExtension = preferDoubleQuotes
+            ? RegExp(r""""[^"\\]*(?:\\.[^"\\]*)*"\s*\.tr\b""")
+            : RegExp(r"('[^'\\]*(?:\\.[^'\\]*)*'\s*\.tr\b)");
         final wordMatches = matchTranslationExtension.allMatches(fileContent);
 
         for (final wordMatch in wordMatches) {
@@ -229,8 +239,10 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
   ///    .tr,
   /// )
   /// ```
-  String _cleanWord(String word) =>
-      word.substring(0, word.lastIndexOf('\'') + 1);
+  String _cleanWord(String word) => word.substring(
+        0,
+        word.lastIndexOf(preferDoubleQuotes ? '"' : '\'') + 1,
+      );
 
   String _basePath(FileSystemEntity fileEntity) =>
       fileEntity.uri.pathSegments.last;
@@ -368,10 +380,10 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
 
       for (final keyAndValue in splittedKeysAndValues) {
         // Last element is empty so this check is neccessary
-        if (keyAndValue.contains('\':')) {
-          final keyAndValueSeperated = keyAndValue.split('\':');
+        if (keyAndValue.contains('$escapedQuote:')) {
+          final keyAndValueSeperated = keyAndValue.split(escapedQuote);
           // Add single quote for key since it was removed when splitting it
-          oldTranslations['${keyAndValueSeperated[0].trim()}\''] =
+          oldTranslations['${keyAndValueSeperated[0].trim()}$escapedQuote'] =
               keyAndValueSeperated[1].trim();
         }
       }
@@ -383,8 +395,6 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
         oldTranslations.remove(key);
       }
     }
-
-    const missingTranslation = '\'--missing translation--\'';
 
     final file = File(fileEntity.path);
     final language = _getLanguage(file);
@@ -401,7 +411,8 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
             (oldTranslations[oldTranslationKey] ?? '').isEmpty;
 
         final entryExistsButIsMissingTranslation =
-            oldTranslations[oldTranslationKey] == missingTranslation;
+            oldTranslations[oldTranslationKey] ==
+                missingTranslationPlaceholderText;
 
         final isMissing = !entryExistsForTranslation ||
             entryExistsButIsEmpty ||
@@ -419,7 +430,7 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
                     ),
                     language,
                   )
-                : missingTranslation
+                : missingTranslationPlaceholderText
             : oldTranslations[oldTranslationKey] ?? '';
 
         sink.writeln("\t$oldTranslationKey: $value,");
@@ -437,7 +448,7 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
   }
 
   /// Helper function used to get the raw String without
-  /// leading and trailing single quote
+  /// leading and trailing quote
   String _removeFirstAndLastCharacter(String string) {
     return string.substring(
       1,
@@ -448,8 +459,6 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
   /// Returns the translation for the given [text] and the [language] in which it should be translated
   /// via the DeepL API
   Future<String> _deepLTranslate(String text, String language) async {
-    const missingTranslation = '\'--missing translation--\'';
-
     try {
       final url = Uri.https('api-free.deepl.com', '/v2/translate');
 
@@ -467,7 +476,7 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
           '❗️   Something went wrong while translating with DeepL.',
         );
         missingLocalizationsCounter++;
-        return missingTranslation;
+        return missingTranslationPlaceholderText;
       }
 
       final json = jsonDecode(
@@ -483,12 +492,12 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
         // Remove double escape characters
         text = text.replaceAll("\\\\'", "\\'");
 
-        return '\'$text\'';
+        return '$escapedQuote$text$escapedQuote';
       }
 
       missingLocalizationsCounter++;
 
-      return missingTranslation;
+      return missingTranslationPlaceholderText;
     } on Exception {
       stderr.writeln(
         '❗️    Something went wrong while translating with DeepL.',
@@ -496,7 +505,7 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
       stderr.writeln(
         '❗️    Make sure that you are connected to the Internet.',
       );
-      return missingTranslation;
+      return missingTranslationPlaceholderText;
     }
   }
 
