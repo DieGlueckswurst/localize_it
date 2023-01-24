@@ -14,6 +14,8 @@ class ModelVisitor extends SimpleElementVisitor<dynamic> {
 
   late bool useGetX;
 
+  late bool preferDoubleQuotes;
+
   @override
   dynamic visitLibraryElement(LibraryElement element) {
     return super.visitLibraryElement(element);
@@ -39,7 +41,11 @@ class ModelVisitor extends SimpleElementVisitor<dynamic> {
         supportedLanguageCodes.add(object.toStringValue()!);
       }
     } else if (valueRaw?.toBoolValue() != null) {
-      useGetX = valueRaw!.toBoolValue()!;
+      if (element.name == 'useGetX') {
+        useGetX = valueRaw!.toBoolValue()!;
+      } else if (element.name == 'preferDoubleQuotes') {
+        preferDoubleQuotes = valueRaw!.toBoolValue()!;
+      }
     }
   }
 }

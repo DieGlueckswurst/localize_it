@@ -262,7 +262,7 @@ packages:
       path: "../localize_it"
       relative: true
     source: path
-    version: "1.0.9"
+    version: "1.1.0"
   localize_it_annotation:
     dependency: "direct main"
     description:
