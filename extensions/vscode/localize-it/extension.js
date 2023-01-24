@@ -69,6 +69,12 @@ function activate(context) {
 		writeLine('  /// Enabling `useGetX` generates `Map<String, Map<String,String>> translationKeys` which can');
 		writeLine('  /// simply be passed to `GetMaterialApp`.');
 		writeLine('  static const bool useGetX = true;');
+		content.write('\n');
+		writeLine('  /// By default localize_it is searching for `Strings` in *singel-quotes*, ');
+		writeLine('  /// See [prefer_single_quotes](https://dart-lang.github.io/linter/lints/prefer_single_quotes.html) for more info.');
+		writeLine('  /// However if you prefer using double quotes in your project you can do this by settings ');
+		writeLine('  /// `preferDoubleQuotes` to  `true`.');
+		writeLine('  static const bool preferDoubleQuotes = false;');
 		writeLine('}');
 		content.end(); 
 
