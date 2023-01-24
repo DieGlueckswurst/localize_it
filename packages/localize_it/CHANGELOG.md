@@ -1,3 +1,7 @@
+## 1.1.1
+
+- Added option to use *double-quotes* for project.
+
 ## 1.1.0
 
 - Resolved Issue having Single Quotes inside `Strings`.
