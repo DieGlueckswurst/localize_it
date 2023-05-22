@@ -1,5 +1,9 @@
 ## 1.1.1
 
+- Fixed bug where saved Strings are reset and everything is translated again.
+
+## 1.1.1
+
 - Added option to use *double-quotes* for project.
 
 ## 1.1.0
