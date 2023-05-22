@@ -1,4 +1,4 @@
-## 1.1.1
+## 1.1.2
 
 - Fixed bug where saved Strings are reset and everything is translated again.
 
