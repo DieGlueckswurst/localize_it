@@ -27,8 +27,8 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
   int missingLocalizationsCounter = 0;
   int successfullyLocalizedCounter = 0;
 
-  late final escapedQuote;
-  late final missingTranslationPlaceholderText;
+  late final String escapedQuote;
+  late final String missingTranslationPlaceholderText;
 
   @override
   Future<void> generateForAnnotatedElement(
@@ -381,7 +381,7 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
       for (final keyAndValue in splittedKeysAndValues) {
         // Last element is empty so this check is neccessary
         if (keyAndValue.contains('$escapedQuote:')) {
-          final keyAndValueSeperated = keyAndValue.split(escapedQuote);
+          final keyAndValueSeperated = keyAndValue.split('$escapedQuote:');
           // Add single quote for key since it was removed when splitting it
           oldTranslations['${keyAndValueSeperated[0].trim()}$escapedQuote'] =
               keyAndValueSeperated[1].trim();
