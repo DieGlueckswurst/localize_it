@@ -17,11 +17,6 @@ class ModelVisitor extends SimpleElementVisitor<dynamic> {
   late bool preferDoubleQuotes;
 
   @override
-  dynamic visitLibraryElement(LibraryElement element) {
-    return super.visitLibraryElement(element);
-  }
-
-  @override
   dynamic visitFieldElement(FieldElement element) {
     location = element.source!.fullName;
 

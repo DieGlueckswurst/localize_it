@@ -36,5 +36,5 @@ class LocaleConfiguration {
   /// See [prefer_single_quotes](https://dart-lang.github.io/linter/lints/prefer_single_quotes.html) for more info.
   /// However if you prefer using double quotes in your project you can do this by settings
   /// `preferDoubleQuotes` to  `true`.
-  static const bool preferDoubleQuotes = true;
+  static const bool preferDoubleQuotes = false;
 }

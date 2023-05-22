@@ -53,7 +53,7 @@ class _ProfilePageState extends State<ProfilePage> {
               child: Center(
                   child: Text(
                 // ignore: prefer_single_quotes
-                "Das ist ein ewig langer Text der nervt. Er geht sogar über mehrere Zeilen. Wenn das funktioniert, freue ich mich sehr."
+                'Das ist ein ewig langer Text der nervt. Er geht sogar über mehrere Zeilen. Wenn das funktioniert, freue ich mich sehr.'
                     .tr,
                 style: TextStyle(
                     fontSize: 72,
@@ -64,8 +64,8 @@ class _ProfilePageState extends State<ProfilePage> {
             const SizedBox(
               height: 50,
             ),
-            Text("I\'m Chris.".tr),
-            Text("Wie geht\'s? Mir geht\'s gut.".tr),
+            Text('I\'m Christian.'.tr),
+            Text('Wie geht\'s? Mir geht\'s gut.'.tr),
           ],
         ),
       ),
