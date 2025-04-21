@@ -4,7 +4,7 @@
 
 ## 1.1.3
 
-- No idea what changed here
+- No idea what changed here, long time ago.
 
 ## 1.1.2
 
