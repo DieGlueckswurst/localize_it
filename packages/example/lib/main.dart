@@ -6,7 +6,7 @@ void main() {
 }
 
 class CodeGenExample extends StatelessWidget {
-  const CodeGenExample({Key key}) : super(key: key);
+  const CodeGenExample({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +17,7 @@ class CodeGenExample extends StatelessWidget {
 }
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({Key key}) : super(key: key);
+  const ProfilePage({Key? key}) : super(key: key);
 
   @override
   _ProfilePageState createState() => _ProfilePageState();
@@ -52,7 +52,6 @@ class _ProfilePageState extends State<ProfilePage> {
                   borderRadius: BorderRadius.circular(100)),
               child: Center(
                   child: Text(
-                // ignore: prefer_single_quotes
                 'Das ist ein ewig langer Text der nervt. Er geht sogar über mehrere Zeilen. Wenn das funktioniert, freue ich mich sehr.'
                     .tr,
                 style: TextStyle(

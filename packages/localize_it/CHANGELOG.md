@@ -1,3 +1,11 @@
+## 1.1.4
+
+- Updated dependencies
+
+## 1.1.3
+
+- No idea what changed here, long time ago.
+
 ## 1.1.2
 
 - Fixed bug where saved Strings are reset and everything is translated again.

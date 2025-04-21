@@ -460,6 +460,7 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
   /// via the DeepL API
   Future<String> _deepLTranslate(String text, String language) async {
     try {
+      stdout.writeln('Translating text: \n$text\n to $language');
       final url = Uri.https('api-free.deepl.com', '/v2/translate');
 
       final body = <String, dynamic>{
@@ -473,7 +474,7 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
 
       if (response.statusCode != 200) {
         stdout.writeln(
-          '❗️   Something went wrong while translating with DeepL.',
+          '❗️   Something went wrong while translating with DeepL: ${response.body}',
         );
         missingLocalizationsCounter++;
         return missingTranslationPlaceholderText;
