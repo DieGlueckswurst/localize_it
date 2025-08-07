@@ -1,3 +1,6 @@
+## 1.1.6
+- Log error status code when DeepL fails
+
 ## 1.1.5
 - Request delay to avoid DeepL timeout
 - Option to log translations 

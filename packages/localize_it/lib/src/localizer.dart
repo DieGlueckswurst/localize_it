@@ -491,7 +491,10 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
 
       if (response.statusCode != 200) {
         stdout.writeln(
-          '❗️   Something went wrong while translating with DeepL: ${response.body}',
+          '❗️   Something went wrong while translating with DeepL...',
+        );
+        stdout.writeln(
+          '❗️   Status Code: ${response.statusCode}',
         );
         missingLocalizationsCounter++;
         return missingTranslationPlaceholderText;
