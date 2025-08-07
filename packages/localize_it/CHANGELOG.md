@@ -1,3 +1,7 @@
+## 1.1.5
+- Request delay to avoid DeepL timeout
+- Option to log translations 
+
 ## 1.1.4
 
 - Updated dependencies

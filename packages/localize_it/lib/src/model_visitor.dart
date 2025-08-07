@@ -16,6 +16,10 @@ class ModelVisitor extends SimpleElementVisitor<dynamic> {
 
   late bool preferDoubleQuotes;
 
+  // New configuration options with defaults
+  int deepLDelayMs = 0;
+  bool logTranslations = false;
+
   @override
   dynamic visitFieldElement(FieldElement element) {
     location = element.source!.fullName;
@@ -40,6 +44,12 @@ class ModelVisitor extends SimpleElementVisitor<dynamic> {
         useGetX = valueRaw!.toBoolValue()!;
       } else if (element.name == 'preferDoubleQuotes') {
         preferDoubleQuotes = valueRaw!.toBoolValue()!;
+      } else if (element.name == 'logTranslations') {
+        logTranslations = valueRaw!.toBoolValue()!;
+      }
+    } else if (valueRaw?.toIntValue() != null) {
+      if (element.name == 'deepLDelayMs') {
+        deepLDelayMs = valueRaw!.toIntValue()!;
       }
     }
   }

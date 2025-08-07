@@ -32,4 +32,14 @@ class LocaleConfiguration {
   /// Enabling `useGetX` generates `Map<String, Map<String,String>> translationKeys` which can
   /// simply be passed to `GetMaterialApp`.
   static const bool useGetX = true;
+
+  /// Delay in milliseconds between DeepL translation requests to avoid timeout issues.
+  /// Useful when making many translation requests to prevent API rate limiting.
+  /// Defaults to: 0 (no delay)
+  static const int deepLDelayMs = 0;
+
+  /// Whether to log translation requests to the console.
+  /// When true, shows 'Translating text: \n$text\n to $language' for each request.
+  /// Defaults to: false
+  static const bool logTranslations = false;
 }

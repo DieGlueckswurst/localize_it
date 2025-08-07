@@ -21,6 +21,10 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
   late bool useGetX;
   late bool preferDoubleQuotes;
 
+  // New configuration options
+  late int deepLDelayMs;
+  late bool logTranslations;
+
   late String baseFilePath;
   late String localizationFilePath;
 
@@ -47,6 +51,10 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
     useDeepL = deepLAuthKey.isNotEmpty;
     useGetX = visitor.useGetX;
     preferDoubleQuotes = visitor.preferDoubleQuotes;
+
+    // Assign new configuration options
+    deepLDelayMs = visitor.deepLDelayMs;
+    logTranslations = visitor.logTranslations;
 
     escapedQuote = preferDoubleQuotes ? '"' : '\'';
     missingTranslationPlaceholderText =
@@ -460,7 +468,11 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
   /// via the DeepL API
   Future<String> _deepLTranslate(String text, String language) async {
     try {
-      stdout.writeln('Translating text: \n$text\n to $language');
+      // Only show translation request if configured to do so
+      if (logTranslations) {
+        stdout.writeln('Translating text: \n$text\n to $language');
+      }
+
       final url = Uri.https('api-free.deepl.com', '/v2/translate');
 
       final body = <String, dynamic>{
@@ -471,6 +483,11 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
       };
 
       final response = await http.post(url, body: body);
+
+      // Add delay after the request if configured
+      if (deepLDelayMs > 0) {
+        await Future.delayed(Duration(milliseconds: deepLDelayMs));
+      }
 
       if (response.statusCode != 200) {
         stdout.writeln(
