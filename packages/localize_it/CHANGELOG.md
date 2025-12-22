@@ -1,3 +1,7 @@
+## 1.1.7
+- Updated DeepL API authentication to use Authorization header (required for compatibility after January 15, 2026)
+- Migrated from legacy auth_key in request body to DeepL-Auth-Key header format
+
 ## 1.1.6
 - Log error status code when DeepL fails
 

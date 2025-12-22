@@ -92,6 +92,8 @@ After installling it you can simply call `localize_it: Create` anywhere inside y
 | `deepLAuthKey`            | `String` that expects your *DeepL Auth Key*                                   |
 |                           | Providing a `deepLAuthKey` enables translation generation                     |
 |                           | via the [DeepL API](https://www.deepl.com/de/pro-api?cta=header-pro-api/).    |
+|                           | Uses the new Authorization header authentication (compatible with DeepL's     |
+|                           | updated API requirements as of January 15, 2026).                            |
 |                           | If no key is provided (empty String), all *marked Strings* (end with `.tr`)   |
 |                           | in your project will get translated to `'--missing translation--'`.           |
 |---------------------------|-------------------------------------------------------------------------------|
