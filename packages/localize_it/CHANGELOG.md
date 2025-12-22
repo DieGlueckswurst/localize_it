@@ -1,3 +1,7 @@
+## 1.1.8
+- Fixed analyzer dependency constraint to use 'any' to avoid version conflicts with other packages
+- Resolves dependency resolution failures with app_lints and other packages requiring analyzer ^7.0.0 or higher
+
 ## 1.1.7
 - Updated DeepL API authentication to use Authorization header (required for compatibility after January 15, 2026)
 - Migrated from legacy auth_key in request body to DeepL-Auth-Key header format

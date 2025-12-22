@@ -3,7 +3,7 @@ description: A tool for making localizing your Flutter App easy peasy lemmon squ
 homepage: https://github.com/DieGlueckswurst/localize_it
 repository: https://github.com/DieGlueckswurst/localize_it
 issue_tracker: https://github.com/DieGlueckswurst/localize_it/issues
-version: 1.1.7
+version: 1.1.8
 platforms:
   android:
   ios:
@@ -17,7 +17,10 @@ environment:
 
 dependencies:
   localize_it_annotation: ^2.0.0
-  analyzer: ^6.11.0
+  # Using 'any' to avoid version conflicts with other packages.
+  # This is intentional - localize_it uses analyzer for code generation
+  # but doesn't depend on specific analyzer APIs.
+  analyzer: any
   build: ^2.3.1
   source_gen: ^2.0.0
   http: ^1.3.0
