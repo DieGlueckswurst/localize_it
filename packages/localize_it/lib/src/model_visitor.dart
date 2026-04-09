@@ -1,31 +1,31 @@
-import 'package:analyzer/dart/element/visitor.dart';
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/visitor2.dart';
 
 /// Visit Configuration file, marked with `@localize_it`
-class ModelVisitor extends SimpleElementVisitor<dynamic> {
+class ModelVisitor extends SimpleElementVisitor2<Object?> {
   List<String> supportedLanguageCodes = [];
   late String baseLanguageCode;
 
-  late String deepLAuthKey;
+  String deepLAuthKey = '';
 
   late String location;
 
   late String mapName;
 
-  late bool useGetX;
+  bool useGetX = false;
 
-  late bool preferDoubleQuotes;
+  /// Default matches single-quote `.tr` scanning when omitted from config.
+  bool preferDoubleQuotes = false;
 
   // New configuration options with defaults
   int deepLDelayMs = 0;
   bool logTranslations = false;
 
   @override
-  dynamic visitFieldElement(FieldElement element) {
-    location = element.source!.fullName;
+  Object? visitFieldElement(FieldElement element) {
+    location = element.firstFragment.libraryFragment.source.fullName;
 
     final valueRaw = element.computeConstantValue();
-    element.name;
 
     if (valueRaw?.toStringValue() != null) {
       if (element.name == 'baseLanguageCode') {
@@ -52,5 +52,6 @@ class ModelVisitor extends SimpleElementVisitor<dynamic> {
         deepLDelayMs = valueRaw!.toIntValue()!;
       }
     }
+    return null;
   }
 }

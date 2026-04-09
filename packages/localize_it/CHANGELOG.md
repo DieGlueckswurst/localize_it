@@ -1,3 +1,12 @@
+## 2.0.0
+
+- **Breaking:** Requires Dart SDK `^3.9.0` and a current Flutter toolchain (e.g. Flutter 3.35+).
+- Upgraded codegen stack: `build` ^4, `source_gen` ^4, `build_runner` ^2.13, `http` ^1.6, `flutter_lints` ^6.
+- Depends on `localize_it_annotation` ^3.0.0.
+- `analyzer` dependency uses a bounded range (`>=8.1.1 <13.0.0`) compatible with `source_gen` / `build`.
+- Migrated element visitor to Analyzer 10+ (`SimpleElementVisitor2`, fragment-based source location).
+- Default values for optional config fields (`preferDoubleQuotes`, `useGetX`, `deepLAuthKey`) when omitted from the config class.
+
 ## 1.1.8
 - Fixed analyzer dependency constraint to use 'any' to avoid version conflicts with other packages
 - Resolves dependency resolution failures with app_lints and other packages requiring analyzer ^7.0.0 or higher
