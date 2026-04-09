@@ -1,3 +1,7 @@
 
 # FVM Version Cache
 .fvm/
+
+# Dart/Flutter generated artifacts (machine-specific paths)
+.dart_tool/
+**/.dart_tool/

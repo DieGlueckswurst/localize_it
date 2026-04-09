@@ -118,7 +118,7 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
     const relativeDirectoryPathForLocalizations = 'localizations/';
 
     sink.writeln(
-      'import \'$relativeDirectoryPathForLocalizations/base/$baseLanguageCode.g.dart\';',
+      'import \'${relativeDirectoryPathForLocalizations}base/$baseLanguageCode.g.dart\';',
     );
     for (String code in supportedLanguageCodes) {
       sink.writeln(
@@ -476,13 +476,17 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
       final url = Uri.https('api-free.deepl.com', '/v2/translate');
 
       final body = <String, dynamic>{
-        'auth_key': deepLAuthKey,
         'text': text,
         'target_lang': language,
         'source_lang': baseLanguageCode.toUpperCase(),
       };
 
-      final response = await http.post(url, body: body);
+      final headers = <String, String>{
+        'Authorization': 'DeepL-Auth-Key $deepLAuthKey',
+        'Content-Type': 'application/x-www-form-urlencoded',
+      };
+
+      final response = await http.post(url, body: body, headers: headers);
 
       // Add delay after the request if configured
       if (deepLDelayMs > 0) {

@@ -5,14 +5,11 @@
   "publisher": "DieGlckswurst",
   "version": "1.0.3",
   "engines": {
-    "vscode": "^1.72.0"
+    "vscode": "^1.75.0"
   },
   "icon": "assets/logo_transparent.png",
   "categories": [
     "Other"
-  ],
-  "activationEvents": [
-    "onCommand:localize_it.create"
   ],
   "main": "./extension.js",
   "contributes": {
@@ -37,7 +34,7 @@
     "test": "node ./test/runTest.js"
   },
   "devDependencies": {
-    "@types/vscode": "^1.72.0",
+    "@types/vscode": "^1.75.0",
     "@types/glob": "^8.0.0",
     "@types/mocha": "^10.0.0",
     "@types/node": "16.x",
