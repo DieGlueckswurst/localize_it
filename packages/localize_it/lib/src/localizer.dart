@@ -118,7 +118,7 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
     const relativeDirectoryPathForLocalizations = 'localizations/';
 
     sink.writeln(
-      'import \'$relativeDirectoryPathForLocalizations/base/$baseLanguageCode.g.dart\';',
+      'import \'${relativeDirectoryPathForLocalizations}base/$baseLanguageCode.g.dart\';',
     );
     for (String code in supportedLanguageCodes) {
       sink.writeln(
