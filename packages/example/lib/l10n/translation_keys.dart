@@ -1,4 +1,4 @@
-import 'localizations//base/de.g.dart';
+import 'localizations/base/de.g.dart';
 import 'localizations/en.g.dart';
 import 'localizations/es.g.dart';
 

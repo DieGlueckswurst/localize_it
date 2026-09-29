@@ -1,3 +1,8 @@
+## 2.1.0
+
+- Requires Dart SDK `^3.11.0`.
+- Supports `analyzer` 14 (`>=14.0.0 <15.0.0`), `source_gen` ^4.3.0 and `build` ^4.0.11, so it can be used together with Freezed 4.
+
 ## 2.0.0
 
 - **Breaking:** Requires Dart SDK `^3.9.0` and a current Flutter toolchain (e.g. Flutter 3.35+).
