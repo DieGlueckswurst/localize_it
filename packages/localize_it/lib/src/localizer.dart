@@ -168,15 +168,22 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
 
     stdout.writeln('Getting all Strings to localize...\n');
 
-    final currentDir = Directory.current;
+    final libDir = Directory('lib');
 
     /// Keeps track of all the words to translate to avoid duplicates
     final allStringsToTranslate = List<String>.empty(growable: true);
 
     final fileNamesWithTranslation = <String, List<String>>{};
 
+    // A quoted string cannot span lines, so `\n` is excluded from its content.
+    // Line breaks are still allowed between the closing quote and `.tr`.
+    final matchTranslationExtension = preferDoubleQuotes
+        ? RegExp(r""""[^"\\\n]*(?:\\.[^"\\\n]*)*"\s*\.tr(?:WithArgs)?\b""")
+        : RegExp(r"('[^'\\\n]*(?:\\.[^'\\\n]*)*'\s*\.tr(?:WithArgs)?\b)");
+    final unescapedDollar = RegExp(r'(?<!\\)\$');
+
     try {
-      final files = await _getDirectorysContents(currentDir);
+      final files = await _getDirectorysContents(libDir);
       final dartFiles = _getDartFiles(files);
 
       await Future.forEach(dartFiles, (File fileEntity) async {
@@ -184,15 +191,22 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
 
         final fileContent = await _readFileContent(fileEntity.path);
 
-        final matchTranslationExtension = preferDoubleQuotes
-            ? RegExp(r""""[^"\\]*(?:\\.[^"\\]*)*"\s*\.tr\b""")
-            : RegExp(r"('[^'\\]*(?:\\.[^'\\]*)*'\s*\.tr\b)");
         final wordMatches = matchTranslationExtension.allMatches(fileContent);
 
         for (final wordMatch in wordMatches) {
+          if (_isInCommentLine(fileContent, wordMatch.start)) continue;
+
           final word = wordMatch.group(0)!;
 
           final wordCleaned = _cleanWord(word);
+
+          if (unescapedDollar.hasMatch(wordCleaned)) {
+            stdout.writeln(
+              '⚠️    Skipped ${fileEntity.path}: $wordCleaned uses string '
+              'interpolation. Use a {placeholder} with .trWithArgs instead.\n',
+            );
+            continue;
+          }
 
           if (!allStringsToTranslate.contains(wordCleaned)) {
             allStringsToTranslate.add(wordCleaned);
@@ -226,11 +240,24 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
     return completer.future;
   }
 
-  /// Returns an iterable of all dart files in a list of [files].
-  Iterable<File> _getDartFiles(List<FileSystemEntity> files) =>
-      files.whereType<File>().where(
-            (file) => file.path.endsWith('.dart'),
-          );
+  /// Returns all hand-written dart files in a list of [files]. Generated files
+  /// and the localization output are skipped.
+  Iterable<File> _getDartFiles(List<FileSystemEntity> files) {
+    final outputDir = Directory(localizationFilePath).absolute.path;
+    return files.whereType<File>().where((file) {
+      final path = file.path;
+      return path.endsWith('.dart') &&
+          !path.endsWith('.g.dart') &&
+          !path.endsWith('.freezed.dart') &&
+          !file.absolute.path.startsWith(outputDir);
+    });
+  }
+
+  /// Whether the line containing [offset] is a `//` or `///` comment.
+  bool _isInCommentLine(String content, int offset) {
+    final lineStart = content.lastIndexOf('\n', offset) + 1;
+    return content.substring(lineStart, offset).trimLeft().startsWith('//');
+  }
 
   /// Reads, decodes and returns the content of a given [filePath]
   Future<String> _readFileContent(String filePath) async {
@@ -238,7 +265,7 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
     return utf8.decodeStream(readStream);
   }
 
-  /// Removes the trailing `.tr` but more importantly removes whitespaces
+  /// Removes the trailing `.tr` / `.trWithArgs` but more importantly removes whitespaces
   /// between the String and `.tr`
   /// Example:
   /// ```
@@ -376,11 +403,16 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
     Map<String, String> oldTranslations = {};
 
     if (fileContent.isNotEmpty) {
-      final matchComments = RegExp(r'\/\/.*\n?');
+      // Only whole comment lines: a translation may contain `//` (URLs).
+      final matchComments = RegExp(r'^[ \t]*\/\/.*\n?', multiLine: true);
       // Remove Comments
       var keysAndValues = fileContent.replaceAll(matchComments, '');
-      // Remove first line
-      keysAndValues = keysAndValues.split('= {')[1].trim();
+      // Remove first line. Only the first `= {` belongs to the map declaration,
+      // translations may contain the same sequence (e.g. `'Sum = {total}'`).
+      const mapStart = '= {';
+      keysAndValues = keysAndValues
+          .substring(keysAndValues.indexOf(mapStart) + mapStart.length)
+          .trim();
       // Remove last closing curly bracket
       keysAndValues.substring(0, keysAndValues.length - 1);
 
@@ -422,9 +454,24 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
             oldTranslations[oldTranslationKey] ==
                 missingTranslationPlaceholderText;
 
+        final entryHasPlaceholderMismatch = entryExistsForTranslation &&
+            !entryExistsButIsEmpty &&
+            !entryExistsButIsMissingTranslation &&
+            !_hasSamePlaceholders(
+              oldTranslationKey,
+              oldTranslations[oldTranslationKey]!,
+            );
+
+        if (entryHasPlaceholderMismatch) {
+          stdout.writeln(
+            '❗️    Placeholder mismatch, resetting translation: $oldTranslationKey',
+          );
+        }
+
         final isMissing = !entryExistsForTranslation ||
             entryExistsButIsEmpty ||
-            entryExistsButIsMissingTranslation;
+            entryExistsButIsMissingTranslation ||
+            entryHasPlaceholderMismatch;
 
         if (isMissing && !useDeepL) {
           missingLocalizationsCounter++;
@@ -447,6 +494,11 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
     stdout.writeln(
       '💡    Missing Localizations: $missingLocalizationsCounter',
     );
+    if (missingLocalizationsCounter > 0) {
+      stdout.writeln(
+        '      Marked with $missingTranslationPlaceholderText, fill them in manually or with an AI agent.',
+      );
+    }
     if (useDeepL) {
       stdout.writeln(
         '💡    New Localizations:     $successfullyLocalizedCounter\n',
@@ -475,10 +527,16 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
 
       final url = Uri.https('api-free.deepl.com', '/v2/translate');
 
+      // Protect `{name}` placeholders from being translated by sending them
+      // as ignored XML tags.
+      final hasPlaceholders = _placeholderPattern.hasMatch(text);
+
       final body = <String, dynamic>{
-        'text': text,
+        'text': hasPlaceholders ? _placeholdersToXml(text) : text,
         'target_lang': language,
         'source_lang': baseLanguageCode.toUpperCase(),
+        if (hasPlaceholders) 'tag_handling': 'xml',
+        if (hasPlaceholders) 'ignore_tags': 'ph',
       };
 
       final headers = <String, String>{
@@ -509,11 +567,23 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
       ) as Map<String, dynamic>?;
 
       if (json != null) {
+        var translated = json['translations'][0]['text'] as String;
+
+        if (hasPlaceholders) {
+          translated = _placeholdersFromXml(translated);
+        }
+
+        if (!_hasSamePlaceholders(text, translated)) {
+          stdout.writeln(
+            '❗️   DeepL changed the placeholders of: $text',
+          );
+          missingLocalizationsCounter++;
+          return missingTranslationPlaceholderText;
+        }
+
         successfullyLocalizedCounter++;
 
-        var text = json['translations'][0]['text'] as String;
-
-        text = _escapeSingleQuotes(text);
+        text = _escapeSingleQuotes(translated);
         // Remove double escape characters
         text = text.replaceAll("\\\\'", "\\'");
 
@@ -533,6 +603,30 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
       return missingTranslationPlaceholderText;
     }
   }
+
+  /// Matches `{name}` placeholders used with `.trWithArgs`.
+  static final _placeholderPattern = RegExp(r'\{(\w+)\}');
+
+  /// Whether [a] and [b] contain exactly the same set of `{name}` placeholders.
+  bool _hasSamePlaceholders(String a, String b) {
+    Set<String> placeholders(String s) =>
+        _placeholderPattern.allMatches(s).map((m) => m.group(1)!).toSet();
+    final first = placeholders(a);
+    final second = placeholders(b);
+    return first.length == second.length && first.containsAll(second);
+  }
+
+  String _placeholdersToXml(String text) => text
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAllMapped(_placeholderPattern, (m) => '<ph>${m.group(1)}</ph>');
+
+  String _placeholdersFromXml(String text) => text
+      .replaceAllMapped(RegExp(r'<ph>(\w+)</ph>'), (m) => '{${m.group(1)}}')
+      .replaceAll('&lt;', '<')
+      .replaceAll('&gt;', '>')
+      .replaceAll('&amp;', '&');
 
   /// Makes sure to skip single-quotes in actual Strings.
   /// Escpecially common for English (e.g. "I'm Christian.").

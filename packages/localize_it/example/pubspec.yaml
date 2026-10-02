@@ -38,7 +38,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   get: ^4.7.0
-  localize_it_annotation: ^3.0.0
+  localize_it_annotation: ^4.0.0
 
 
 
@@ -50,6 +50,10 @@ dev_dependencies:
   build_runner: ^2.13.0
   localize_it:
     path: ../
+
+dependency_overrides:
+  localize_it_annotation:
+    path: ../../localize_it_annotation
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

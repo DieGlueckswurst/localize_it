@@ -1,3 +1,20 @@
+## 3.0.0
+
+- **Breaking:** Depends on `localize_it_annotation` ^4.0.0.
+- **Breaking:** Existing translations whose `{name}` placeholders differ from the base string are reset to `'--missing translation--'` on the next run.
+- Strings marked with `.trWithArgs(...)` are extracted just like `.tr`.
+- DeepL keeps `{name}` placeholders untouched (sent as ignored XML tags); results with changed placeholders are marked as missing.
+- Fixed parsing of localization files when a translation contains `= {`.
+- Without `deepLAuthKey`, missing translations are marked with `'--missing translation--'` so they can be filled in manually or by an AI agent.
+- **Breaking:** Only `lib/` is scanned. Generated files (`.g.dart`, `.freezed.dart`) and the localization output are skipped.
+- Strings in `//` and `///` comment lines, strings spanning a line break and strings with `$` interpolation are no longer extracted (interpolation prints a warning). These used to produce invalid localization files.
+- Fixed translations containing `//` (e.g. URLs) being cut off when reading existing localization files.
+
+## 2.1.0
+
+- Requires Dart SDK `^3.11.0`.
+- Supports `analyzer` 14 (`>=14.0.0 <15.0.0`), `source_gen` ^4.3.0 and `build` ^4.0.11, so it can be used together with Freezed 4.
+
 ## 2.0.0
 
 - **Breaking:** Requires Dart SDK `^3.9.0` and a current Flutter toolchain (e.g. Flutter 3.35+).
