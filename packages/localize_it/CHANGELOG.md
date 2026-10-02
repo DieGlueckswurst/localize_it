@@ -1,3 +1,7 @@
+## 3.0.1
+
+- Fixed files next to the localization output whose name starts with the same prefix (e.g. `localizations_utils.dart`) being skipped during extraction.
+
 ## 3.0.0
 
 - **Breaking:** Depends on `localize_it_annotation` ^4.0.0.
