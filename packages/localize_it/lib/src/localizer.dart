@@ -243,7 +243,9 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
   /// Returns all hand-written dart files in a list of [files]. Generated files
   /// and the localization output are skipped.
   Iterable<File> _getDartFiles(List<FileSystemEntity> files) {
-    final outputDir = Directory(localizationFilePath).absolute.path;
+    // Trailing separator, so siblings like `localizations_utils.dart` still match.
+    final outputDir =
+        '${Directory(localizationFilePath).absolute.path}${Platform.pathSeparator}';
     return files.whereType<File>().where((file) {
       final path = file.path;
       return path.endsWith('.dart') &&
