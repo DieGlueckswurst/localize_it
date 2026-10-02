@@ -279,10 +279,10 @@ packages:
     dependency: "direct main"
     description:
       name: localize_it_annotation
-      sha256: "390ab6c1499536097620e7d133d912405112c4b888fa532b4f6ccbedf0d09f18"
+      sha256: b13af1aa293e0f3f9e1b0639b8aed9356fa4163fc2301d692edd30789be2931a
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.0"
+    version: "4.0.0"
   logging:
     dependency: transitive
     description:
