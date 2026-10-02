@@ -141,6 +141,36 @@ flutter pub run build_runner build --delete-conflicting-outputs
 
 This will find all `Strings` that end with `.tr` in your project and localize them depending on your `baseLanugageCode` and `supportedLanguageCodes`. 
 
+Only files in `lib/` are scanned. Generated files (`.g.dart`, `.freezed.dart`), the localization output and Strings in `//` / `///` comment lines are ignored.
+
+## 7. Placeholders
+
+String interpolation (`'Hello $name'.tr`) can't be translated, because the key changes at runtime. Use named `{placeholders}` and `.trWithArgs` instead:
+
+```dart
+'Möchtest du "{title}" wirklich löschen?'.trWithArgs({'title': recipe.title})
+```
+
+Register the runtime lookup once at app start (e.g. in `main`):
+
+```dart
+LocalizeIt.translate = (key) => key.tr; // GetX
+```
+
+`.trWithArgs` translates the key via `LocalizeIt.translate` and then replaces every `{name}` with its value. The generator extracts these Strings like any `.tr` String.
+
+Translations must contain exactly the same placeholders as the base String. If they don't, the translation is reset to `'--missing translation--'` on the next run.
+
+## 8. Translating without DeepL (e.g. with an AI agent)
+
+Leave `deepLAuthKey` empty. Every new String is then written as `'--missing translation--'` into all localization files. Search for that marker and replace the values, manually or with an AI agent that can read your code for context. Filled-in translations are kept on the next run.
+
+Rules for editing the files by hand or by an agent:
+
+- Only change the value, never the key.
+- One entry per line: `'key': 'value',`
+- Escape single quotes in values (`\'`), keep `{placeholders}` exactly as in the key.
+
 ## Good to know
 
 1. *You can always change the translated text in your localization filels. The change/adjust will NOT be overritten when calling the script again.*

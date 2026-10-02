@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:localize_it_annotation/localize_it_annotation.dart';
 
 void main() {
+  LocalizeIt.translate = (key) => key.tr;
   runApp(const MyApp());
 }
 
@@ -54,6 +56,11 @@ class _MyHomePageState extends State<MyHomePage> {
             Text(
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            Text(
+              'Noch {count} Klicks bis zum Ziel'.trWithArgs({
+                'count': 10 - _counter,
+              }),
             ),
           ],
         ),
