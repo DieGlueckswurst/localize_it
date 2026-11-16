@@ -1,3 +1,8 @@
+## 4.1.0
+
+- Added `String.trIn(String context, [Map<String, Object?> args])` for strings that need a different translation depending on where they are shown. Falls back to the plain string while the context key has no translation.
+- Added `LocalizeIt.contextKey` and `LocalizeIt.contextSeparator` (`@@`).
+
 ## 4.0.0
 
 - Added `String.trWithArgs(Map<String, Object?> args)` for translations with named `{name}` placeholders.

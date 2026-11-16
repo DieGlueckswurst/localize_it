@@ -1,3 +1,9 @@
+## 3.1.0
+
+- Added `.trIn('context')`: the same base String can get a different translation per context (`'Einladung'.trIn('Anlass')` becomes the key `'Einladung@@Anlass'`). The base language shows the plain String, DeepL gets the context.
+- Keys used in more than one file get an `// also used in: …` comment in every localization file.
+- Depends on `localize_it_annotation` ^4.1.0.
+
 ## 3.0.1
 
 - Fixed files next to the localization output whose name starts with the same prefix (e.g. `localizations_utils.dart`) being skipped during extraction.

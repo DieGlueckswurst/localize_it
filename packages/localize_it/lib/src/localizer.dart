@@ -34,6 +34,12 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
   late final String escapedQuote;
   late final String missingTranslationPlaceholderText;
 
+  /// Files (base names) each key is used in, in the order they were found.
+  final Map<String, List<String>> _usages = {};
+
+  /// Keys from `.trIn(context)`: the quoted base string and the raw context.
+  final Map<String, ({String text, String context})> _contextKeys = {};
+
   @override
   Future<void> generateForAnnotatedElement(
     Element element,
@@ -43,9 +49,7 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
     final visitor = ModelVisitor();
 
     // Visits all the children of element in no particular order.
-    element.visitChildren(
-      visitor,
-    );
+    element.visitChildren(visitor);
 
     deepLAuthKey = visitor.deepLAuthKey;
     useDeepL = deepLAuthKey.isNotEmpty;
@@ -63,17 +67,13 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
     final rawLocation = visitor.location;
 
     final pathForDirectory = rawLocation.substring(
-      rawLocation.indexOf(
-        'lib',
-      ),
+      rawLocation.indexOf('lib'),
       rawLocation.lastIndexOf('/'),
     );
     const directoryName = '/localizations';
 
     // Make Directory with path lib/l10n/localizations
-    final localizationsDirectory = Directory(
-      pathForDirectory + directoryName,
-    );
+    final localizationsDirectory = Directory(pathForDirectory + directoryName);
 
     if (!localizationsDirectory.existsSync()) {
       await localizationsDirectory.create();
@@ -177,9 +177,12 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
 
     // A quoted string cannot span lines, so `\n` is excluded from its content.
     // Line breaks are still allowed between the closing quote and `.tr`.
-    final matchTranslationExtension = preferDoubleQuotes
-        ? RegExp(r""""[^"\\\n]*(?:\\.[^"\\\n]*)*"\s*\.tr(?:WithArgs)?\b""")
-        : RegExp(r"('[^'\\\n]*(?:\\.[^'\\\n]*)*'\s*\.tr(?:WithArgs)?\b)");
+    // Group 1 is the quoted string, group 2 the context of `.trIn('context')`.
+    final q = preferDoubleQuotes ? '"' : "'";
+    final quoted = '$q[^$q\\\\\\n]*(?:\\\\.[^$q\\\\\\n]*)*$q';
+    final matchTranslationExtension = RegExp(
+      '($quoted)\\s*\\.(?:trIn\\s*\\(\\s*($quoted)|tr(?:WithArgs)?\\b)',
+    );
     final unescapedDollar = RegExp(r'(?<!\\)\$');
 
     try {
@@ -196,17 +199,28 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
         for (final wordMatch in wordMatches) {
           if (_isInCommentLine(fileContent, wordMatch.start)) continue;
 
-          final word = wordMatch.group(0)!;
+          final text = wordMatch.group(1)!;
+          final context = wordMatch.group(2);
 
-          final wordCleaned = _cleanWord(word);
-
-          if (unescapedDollar.hasMatch(wordCleaned)) {
+          if (unescapedDollar.hasMatch(text) ||
+              (context != null && unescapedDollar.hasMatch(context))) {
             stdout.writeln(
-              '⚠️    Skipped ${fileEntity.path}: $wordCleaned uses string '
+              '⚠️    Skipped ${fileEntity.path}: $text uses string '
               'interpolation. Use a {placeholder} with .trWithArgs instead.\n',
             );
             continue;
           }
+
+          final wordCleaned = context == null
+              ? text
+              : _contextKey(text, context);
+          if (context != null) {
+            _contextKeys[wordCleaned] = (text: text, context: context);
+          }
+
+          final fileName = _basePath(fileEntity);
+          final usedIn = _usages.putIfAbsent(wordCleaned, () => []);
+          if (!usedIn.contains(fileName)) usedIn.add(fileName);
 
           if (!allStringsToTranslate.contains(wordCleaned)) {
             allStringsToTranslate.add(wordCleaned);
@@ -234,9 +248,11 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
     final files = <FileSystemEntity>[];
     final completer = Completer<List<FileSystemEntity>>();
     final lister = directory.list(recursive: true);
-    lister.listen((file) => files.add(file),
-        onError: (Object error) => completer.completeError(error),
-        onDone: () => completer.complete(files));
+    lister.listen(
+      (file) => files.add(file),
+      onError: (Object error) => completer.completeError(error),
+      onDone: () => completer.complete(files),
+    );
     return completer.future;
   }
 
@@ -267,19 +283,20 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
     return utf8.decodeStream(readStream);
   }
 
-  /// Removes the trailing `.tr` / `.trWithArgs` but more importantly removes whitespaces
-  /// between the String and `.tr`
-  /// Example:
-  /// ```
-  /// Text(
-  ///   'This is a very long String. It goes on and on and on and on'
-  ///    .tr,
-  /// )
-  /// ```
-  String _cleanWord(String word) => word.substring(
-        0,
-        word.lastIndexOf(preferDoubleQuotes ? '"' : '\'') + 1,
-      );
+  /// Joins the quoted [text] and quoted [context] of `.trIn` into one quoted
+  /// key, the same way `LocalizeIt.contextKey` does at runtime:
+  /// `'Einladung'` + `'Anlass'` -> `'Einladung@@Anlass'`.
+  String _contextKey(String text, String context) {
+    final key = LocalizeIt.contextKey(
+      _removeFirstAndLastCharacter(text),
+      _removeFirstAndLastCharacter(context),
+    );
+    return '$escapedQuote$key$escapedQuote';
+  }
+
+  /// The quoted base-language string of a [key]: the key itself, or the
+  /// string without its context for `.trIn` keys.
+  String _baseText(String key) => _contextKeys[key]?.text ?? key;
 
   String _basePath(FileSystemEntity fileEntity) =>
       fileEntity.uri.pathSegments.last;
@@ -295,7 +312,7 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
       fileNamesWithTranslation,
       language: baseLanguageCode,
       writeKeyAndValue: (translation, sink) {
-        sink.writeln('\t$translation: $translation,');
+        sink.writeln('\t$translation: ${_baseText(translation)},');
       },
     );
 
@@ -318,7 +335,7 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
   Future<void> _writeTranslationsToFile(
     File file,
     Map<String, List<String>> fileNamesWithTranslation, {
-    required void Function(String, IOSink) writeKeyAndValue,
+    required FutureOr<void> Function(String, IOSink) writeKeyAndValue,
     required String language,
   }) async {
     final sink = file.openWrite();
@@ -330,10 +347,23 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
       MapEntry<String, List<String>> entry,
     ) async {
       sink.writeln('\n\t//  ${entry.key}');
-      await Future.forEach(
-        entry.value,
-        (String translation) => writeKeyAndValue(translation, sink),
-      );
+      await Future.forEach(entry.value, (String translation) async {
+        // A key used in several files gets one translation for all of them,
+        // so translators should know every place it shows up.
+        final otherFiles = [
+          for (final file in _usages[translation] ?? const <String>[])
+            if (file != entry.key) file,
+        ];
+        if (otherFiles.isNotEmpty) {
+          const maxListed = 5;
+          final listed = otherFiles.take(maxListed).join(', ');
+          final more = otherFiles.length > maxListed
+              ? ' and ${otherFiles.length - maxListed} more'
+              : '';
+          sink.writeln('\t// also used in: $listed$more');
+        }
+        await writeKeyAndValue(translation, sink);
+      });
     });
 
     sink.writeln('};');
@@ -347,9 +377,7 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
   Future<List<File>> _getLocalizationFiles() async {
     final localizationFiles = <File>[];
     for (final code in supportedLanguageCodes) {
-      final file = File(
-        '$localizationFilePath/$code.g.dart',
-      );
+      final file = File('$localizationFilePath/$code.g.dart');
       if (!file.existsSync()) {
         await file.create();
       }
@@ -359,9 +387,7 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
   }
 
   Future<File> _getBaseFile() async {
-    final file = File(
-      '$baseFilePath/$baseLanguageCode.g.dart',
-    );
+    final file = File('$baseFilePath/$baseLanguageCode.g.dart');
     if (!file.existsSync()) {
       await file.create();
     }
@@ -446,21 +472,24 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
       fileNamesWithTranslation,
       language: language,
       writeKeyAndValue: (oldTranslationKey, sink) async {
-        final entryExistsForTranslation =
-            oldTranslations.containsKey(oldTranslationKey);
+        final entryExistsForTranslation = oldTranslations.containsKey(
+          oldTranslationKey,
+        );
 
-        final entryExistsButIsEmpty = entryExistsForTranslation &&
+        final entryExistsButIsEmpty =
+            entryExistsForTranslation &&
             (oldTranslations[oldTranslationKey] ?? '').isEmpty;
 
         final entryExistsButIsMissingTranslation =
             oldTranslations[oldTranslationKey] ==
-                missingTranslationPlaceholderText;
+            missingTranslationPlaceholderText;
 
-        final entryHasPlaceholderMismatch = entryExistsForTranslation &&
+        final entryHasPlaceholderMismatch =
+            entryExistsForTranslation &&
             !entryExistsButIsEmpty &&
             !entryExistsButIsMissingTranslation &&
             !_hasSamePlaceholders(
-              oldTranslationKey,
+              _baseText(oldTranslationKey),
               oldTranslations[oldTranslationKey]!,
             );
 
@@ -470,7 +499,8 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
           );
         }
 
-        final isMissing = !entryExistsForTranslation ||
+        final isMissing =
+            !entryExistsForTranslation ||
             entryExistsButIsEmpty ||
             entryExistsButIsMissingTranslation ||
             entryHasPlaceholderMismatch;
@@ -481,21 +511,23 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
 
         var value = isMissing
             ? useDeepL
-                ? await _deepLTranslate(
-                    _removeFirstAndLastCharacter(
-                      oldTranslationKey,
-                    ),
-                    language,
-                  )
-                : missingTranslationPlaceholderText
+                  ? await _deepLTranslate(
+                      _removeFirstAndLastCharacter(
+                        _baseText(oldTranslationKey),
+                      ),
+                      language,
+                      context: switch (_contextKeys[oldTranslationKey]) {
+                        final key? => _removeFirstAndLastCharacter(key.context),
+                        null => null,
+                      },
+                    )
+                  : missingTranslationPlaceholderText
             : oldTranslations[oldTranslationKey] ?? '';
 
         sink.writeln("\t$oldTranslationKey: $value,");
       },
     );
-    stdout.writeln(
-      '💡    Missing Localizations: $missingLocalizationsCounter',
-    );
+    stdout.writeln('💡    Missing Localizations: $missingLocalizationsCounter');
     if (missingLocalizationsCounter > 0) {
       stdout.writeln(
         '      Marked with $missingTranslationPlaceholderText, fill them in manually or with an AI agent.',
@@ -512,15 +544,16 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
   /// Helper function used to get the raw String without
   /// leading and trailing quote
   String _removeFirstAndLastCharacter(String string) {
-    return string.substring(
-      1,
-      string.length - 1,
-    );
+    return string.substring(1, string.length - 1);
   }
 
   /// Returns the translation for the given [text] and the [language] in which it should be translated
   /// via the DeepL API
-  Future<String> _deepLTranslate(String text, String language) async {
+  Future<String> _deepLTranslate(
+    String text,
+    String language, {
+    String? context,
+  }) async {
     try {
       // Only show translation request if configured to do so
       if (logTranslations) {
@@ -537,6 +570,8 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
         'text': hasPlaceholders ? _placeholdersToXml(text) : text,
         'target_lang': language,
         'source_lang': baseLanguageCode.toUpperCase(),
+        // Steers word choice, is not translated itself.
+        'context': ?context,
         if (hasPlaceholders) 'tag_handling': 'xml',
         if (hasPlaceholders) 'ignore_tags': 'ph',
       };
@@ -557,16 +592,13 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
         stdout.writeln(
           '❗️   Something went wrong while translating with DeepL...',
         );
-        stdout.writeln(
-          '❗️   Status Code: ${response.statusCode}',
-        );
+        stdout.writeln('❗️   Status Code: ${response.statusCode}');
         missingLocalizationsCounter++;
         return missingTranslationPlaceholderText;
       }
 
-      final json = jsonDecode(
-        utf8.decode(response.bodyBytes),
-      ) as Map<String, dynamic>?;
+      final json =
+          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>?;
 
       if (json != null) {
         var translated = json['translations'][0]['text'] as String;
@@ -576,9 +608,7 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
         }
 
         if (!_hasSamePlaceholders(text, translated)) {
-          stdout.writeln(
-            '❗️   DeepL changed the placeholders of: $text',
-          );
+          stdout.writeln('❗️   DeepL changed the placeholders of: $text');
           missingLocalizationsCounter++;
           return missingTranslationPlaceholderText;
         }
@@ -599,9 +629,7 @@ class Localizer extends GeneratorForAnnotation<LocalizeItAnnotation> {
       stderr.writeln(
         '❗️    Something went wrong while translating with DeepL.',
       );
-      stderr.writeln(
-        '❗️    Make sure that you are connected to the Internet.',
-      );
+      stderr.writeln('❗️    Make sure that you are connected to the Internet.');
       return missingTranslationPlaceholderText;
     }
   }
