@@ -161,7 +161,30 @@ LocalizeIt.translate = (key) => key.tr; // GetX
 
 Translations must contain exactly the same placeholders as the base String. If they don't, the translation is reset to `'--missing translation--'` on the next run.
 
-## 8. Translating without DeepL (e.g. with an AI agent)
+## 8. Same String, different meaning: `.trIn`
+
+The base String is the key, so it has exactly one translation in every language. Sometimes that is not enough: German `'Einladung'` is the title of an invite screen ("Invitation") and also an occasion tag for recipes ("Having guests"). Give the second place a context:
+
+```dart
+'Einladung'.tr                                   // 'Einladung' -> 'Invitation'
+'Einladung'.trIn('Anlass')                       // 'Einladung@@Anlass' -> 'Having guests'
+'Hallo {name}'.trIn('Push', {'name': username})  // with placeholders
+```
+
+- The generator writes `'Einladung@@Anlass'` as its own entry, so it gets its own translation.
+- The base language still shows `'Einladung'`. If a context key has no translation yet, `.trIn` falls back to the plain String, never the internal key.
+- The context must be a String literal, like the String itself. It is sent to DeepL as `context`, which steers the word choice.
+- Use a short word that names the place or the meaning (`'Anlass'`, `'Tag'`, `'Ernährung'`).
+
+Keys used in more than one file get a comment above the entry in every localization file, so translators see that one translation has to fit all of them:
+
+```dart
+	//  ui_follow_button.dart
+	// also used in: ui_alert_dialog.dart, profile_view.dart and 15 more
+	'Abbrechen': 'Cancel',
+```
+
+## 9. Translating without DeepL (e.g. with an AI agent)
 
 Leave `deepLAuthKey` empty. Every new String is then written as `'--missing translation--'` into all localization files. Search for that marker and replace the values, manually or with an AI agent that can read your code for context. Filled-in translations are kept on the next run.
 
@@ -169,6 +192,7 @@ Rules for editing the files by hand or by an agent:
 
 - Only change the value, never the key.
 - One entry per line: `'key': 'value',`
+- For a key that ends in `@@context`, translate only the part before `@@`, in the meaning the context names.
 - Escape single quotes in values (`\'`), keep `{placeholders}` exactly as in the key.
 
 ## Good to know
